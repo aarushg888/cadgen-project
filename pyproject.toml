@@ -1,0 +1,17 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "cadgen"
+version = "0.1.0"
+description = "Fine-tuned LLM tooling for CadQuery / 3D code generation: execution harness, data pipeline, evaluation"
+requires-python = ">=3.10"
+dependencies = ["cadquery>=2.4", "numpy", "scipy", "trimesh", "pyyaml"]
+
+[project.optional-dependencies]
+dev = ["pytest"]
+llm = ["openai", "datasets", "huggingface_hub"]
+
+[tool.setuptools.packages.find]
+include = ["cadgen*"]

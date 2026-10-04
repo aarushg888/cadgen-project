@@ -1,0 +1,27 @@
+# Frozen decisions. Change deliberately; retrain/re-evaluate if you do.
+name: cadgen
+output_contract:
+  language: python
+  library: cadquery
+  units: mm
+  first_line: "import cadquery as cq"
+  result_variable: result
+  single_solid: true
+  allowed_imports: [cadquery, math, numpy, typing, itertools, functools, collections, dataclasses]
+  response_format: "single fenced ```python block"
+decisions:            # see PLAN.md section 6
+  D1_angle: "A+B+C+E (consumer coverage, clean license, verifier training, better benchmark)"
+  D2_license_target: "permissive if data audit allows"
+  D3_base_model: "Qwen2.5-Coder-7B-Instruct (prototype on 1.5B-3B first); re-check newer open coder models"
+  D4_hardware: "M4 MacBook Air 24GB: prototype 1.5B-3B locally with MLX; rent CUDA GPU for 7B SFT and RL"
+  D5_units: "mm only; rescale or drop normalized-unit samples"
+  D6_name: cadgen
+sandbox:
+  timeout_s: 20
+  extra_mem_mb: 4096
+  workers: 8
+eval:
+  bbox_tol: 0.10
+  volume_tol: 0.15
+  chamfer_points: 4096
+  geo_pass: "executes AND bbox_match AND volume_match"

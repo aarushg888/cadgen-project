@@ -1,0 +1,47 @@
+"""Hand-written seed benchmark: prompt + reference CadQuery. Edit here, then run:
+    python benchmark/build_seed_benchmark.py
+This is a SMOKE benchmark (12 tasks) for the harness. The real benchmark (200+ tasks, hand-checked,
+decontaminated from all training data) is a Stage 5 deliverable - see PLAN.md.
+"""
+import json, pathlib
+
+T = []
+def add(id, category, prompt, code):
+    T.append({"id": id, "category": category, "prompt": prompt, "code": "import cadquery as cq\n" + code.strip() + "\n"})
+
+add("plate_holes", "mechanical",
+    "A rectangular mounting plate 60 mm by 40 mm and 5 mm thick with four 4 mm diameter holes, one near each corner, 5 mm in from each edge.",
+    'result = (cq.Workplane("XY").box(60, 40, 5).faces(">Z").workplane()\n          .rect(50, 30, forConstruction=True).vertices().hole(4))')
+add("cylinder", "mechanical", "A solid cylinder 30 mm in diameter and 50 mm tall.",
+    'result = cq.Workplane("XY").circle(15).extrude(50)')
+add("washer", "mechanical", "A flat washer with 20 mm outer diameter, 10 mm inner diameter and 2 mm thickness.",
+    'result = cq.Workplane("XY").circle(10).circle(5).extrude(2)')
+add("l_bracket", "mechanical",
+    "An L-shaped bracket: two flat legs, each 40 mm long, 3 mm thick and 20 mm wide, joined at a right angle.",
+    'result = cq.Workplane("XZ").polyline([(0,0),(40,0),(40,3),(3,3),(3,40),(0,40)]).close().extrude(20)')
+add("open_box", "mechanical", "A rectangular open-top box, 80 mm long, 50 mm wide and 30 mm tall, with 2 mm thick walls.",
+    'result = cq.Workplane("XY").box(80, 50, 30).faces(">Z").shell(-2)')
+add("hex_nut", "mechanical", "A hexagonal nut, 14.4 mm across the corners, 6.5 mm thick, with an 8 mm diameter center hole.",
+    'result = cq.Workplane("XY").polygon(6, 14.4).circle(4).extrude(6.5)')
+add("hole_disc", "mechanical",
+    "A round disc 60 mm in diameter and 6 mm thick with a 10 mm center hole and six 5 mm holes evenly spaced on a 40 mm diameter circle.",
+    'result = (cq.Workplane("XY").circle(30).extrude(6).faces(">Z").workplane().hole(10)\n          .faces(">Z").workplane().polarArray(20, 0, 360, 6).hole(5))')
+add("u_channel", "mechanical",
+    "A U-shaped channel 50 mm long with a 20 mm wide, 15 mm tall cross-section and 2 mm thick walls and base.",
+    'result = cq.Workplane("XY").polyline([(0,0),(20,0),(20,15),(18,15),(18,2),(2,2),(2,15),(0,15)]).close().extrude(50)')
+add("pencil_holder", "consumer",
+    "A round pencil holder 80 mm in diameter and 100 mm tall, hollow with 5 mm thick walls and a 5 mm thick solid base.",
+    'outer = cq.Workplane("XY").circle(40).extrude(100)\ninner = cq.Workplane("XY").workplane(offset=5).circle(35).extrude(95)\nresult = outer.cut(inner)')
+add("picture_frame", "consumer",
+    "A flat rectangular picture frame, 200 mm by 150 mm outside, with a 15 mm wide border and 8 mm thickness (open in the middle).",
+    'result = cq.Workplane("XY").rect(200, 150).rect(170, 120).extrude(8)')
+add("stepped_pyramid", "architectural",
+    "A stepped pyramid made of three stacked square blocks, 60 mm, 40 mm and 20 mm wide, each 15 mm tall, centered on each other.",
+    'result = (cq.Workplane("XY").rect(60, 60).extrude(15).faces(">Z").workplane().rect(40, 40).extrude(15)\n          .faces(">Z").workplane().rect(20, 20).extrude(15))')
+add("small_table", "architectural",
+    "A small table: a 100 mm by 60 mm top that is 4 mm thick, and four square legs 6 mm by 6 mm and 50 mm tall, each set 3 mm in from the edges of the top.",
+    'top = cq.Workplane("XY").box(100, 60, 4).translate((0, 0, 52))\nlegs = cq.Workplane("XY").pushPoints([(44,24),(-44,24),(44,-24),(-44,-24)]).rect(6, 6).extrude(50)\nresult = top.union(legs)')
+
+out = pathlib.Path(__file__).with_name("seed_tasks.jsonl")
+out.write_text("".join(json.dumps(t) + "\n" for t in T))
+print(f"wrote {len(T)} tasks -> {out}")

@@ -1,0 +1,10 @@
+cadquery>=2.4
+numpy
+scipy
+trimesh
+pyyaml
+pytest
+# optional (data download / LLM backends)
+# openai
+# datasets
+# huggingface_hub
