@@ -15,3 +15,6 @@ llm = ["openai", "datasets", "huggingface_hub"]
 
 [tool.setuptools.packages.find]
 include = ["cadgen*"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
