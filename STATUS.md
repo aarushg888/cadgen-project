@@ -1,29 +1,25 @@
 # STATUS.md — cadgen current status (rewrite, don't append)
 
-Last updated: 2026-10-04. Stage: 1 (decisions) done, entering Stage 2 (data).
+Last updated: 2026-10-04. Stage: 2 (data) — sources acquired, ingested, 2k pilot filtered.
 
 ## Decisions (D1–D6, confirmed from `configs/project.yaml` defaults)
-- D1 angle: A+B+C+E (consumer coverage, clean license, verifier training, better benchmark)
-- D2 license: permissive (Apache-2.0/MIT) if data audit allows, else non-commercial
-- D3 base model: Qwen2.5-Coder-7B-Instruct, prototype on 1.5B–3B first; re-check newer coders before committing
-- D4 hardware: M4 MacBook Air 24GB, prototype 1.5B–3B locally with MLX; rent CUDA GPU for 7B SFT + RL (escalation)
-- D5 units: mm only; rescale or drop normalized-unit samples
-- D6 name: cadgen
+- D1 angle: A+B+C+E; D2 license: permissive if audit allows; D3 base: Qwen2.5-Coder-7B (prototype 1.5B–3B); D4 hw: M4 Air local + rented GPU later; D5 units: mm only; D6 name: cadgen
+- New since Stage 1: source adapter policy (strip export calls, synthesize `result` var, keep raw in meta) — see DECISIONS.md
 
 ## Success targets (written before any real baseline numbers — do not move after seeing results)
 - exec rate ≥ 80% and geo_pass ≥ 60% on the 200+ task benchmark
 - beat the few-shot base baseline with a non-overlapping bootstrap confidence interval
-- Confirm/adjust thresholds after Stage 5 baselines per PLAN.md (any change recorded in DECISIONS.md)
 
-## Harness (verified this session, real runs)
-- `pytest -q`: 20 passed (tests/ only; `testpaths=["tests"]` added — see DECISIONS.md)
-- `python scripts/smoke_test.py`: PASSED — filter ok 12/16 (pass_rate 0.75); eval exec_rate 0.75, geo_pass 0.667, mean_iou 0.697, pass@1 0.667, pass@2 1.0
-- `SandboxPool().mode == "oneshot"` on this Mac (fork is Linux-only) — confirmed
-- Env: Darwin ARM64, 24GB RAM, venv Python 3.14.6, cadquery 2.8.0; ollama has `ornith:9B`; mlx/mlx-lm not installed yet (Stage 3)
+## Data (real runs this session)
+- Acquired: CAD-Coder (8177 high + 66k middle + 157k all + val/test/CoT, ~650MB) and Text-to-CadQuery (99k train + val/test, ~1.3GB) in `data/raw/` (gitignored).
+- Ingested: 8,177 cc-high + 99,236 t2cq samples. Both sources violate the contract raw (no `result`, t2cq writes `./stlcq/*.stl`); normalized via `cadgen/data/adapt.py` (4 tests pass).
+- Pilot filter (cc-high adapted, n=2000, 8 workers, 817s): ok=200 (10%), dup_geometry=1577, multi_solid=126, dup_code=81, invalid=12, empty=4. Zero syntax/forbidden/timeout. **The 10% is a dedupe artifact** (0.1-unit geom signature vs 0.02–0.75-unit data), not exec quality (exec failures 7%).
+- Harness (Stage 1, still green): `pytest -q` 20 passed → now 24 with adapt tests; smoke_test PASSED.
 
 ## Best model / eval numbers
-- None yet. No real benchmark (only 12-task seed smoke test), no baselines measured.
+- None yet. No real benchmark, no baselines measured.
 
 ## Open questions
-- None blocking. Anticipated escalation: paid GPU rental for 7B SFT + Stage 4 RL (needs human approval).
-- Next: Stage 2 — acquire real data (CAD-Coder + Text-to-CadQuery), inspect raw files, 2k pilot filter slice.
+- D5 pending: rescale normalized data to mm vs drop — blocks the 5–10k pilot split (escalation filed on license; units decision is mine, leaning rescale-then-dedupe).
+- License escalation open: commercial-use rights for Text2CAD-derived sources (see ESCALATIONS.md). No training until resolved.
+- Next: rescale policy + dedupe-after-rescale → 5–10k pilot split → t2cq slice → ollama baselines on seed tasks.
