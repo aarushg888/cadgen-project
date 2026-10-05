@@ -48,3 +48,14 @@
 - D5 decision (recorded in DECISIONS.md, project.yaml updated): tag-and-separate. Rescaling code numbers without touching prompt numbers teaches scale mismatch; rewriting prompt numbers risks corrupting counts/angles. Normalized sources tagged `meta.units=normalized` (new `--units` flag on adapt); mm-only contract enforced for synthetic + benchmark. Nothing trained yet, so the deliberate D5 change is safe.
 - Re-ran adapt from originals with `--units normalized`, re-ran 2k pilot slice: ok=1297 (0.65), dup_geometry=480, multi_solid=126, dup_code=81, invalid=12, empty=4, 1156s. Remaining 480 dups have distinct groups (no group overlap with passed) — distinct designs with near-identical normalized geometry; acceptable to exclude (near-dup prompt detection is separate future work per PLAN 2.4).
 - Launched full cc-high filter in background: `--workers 8 --dedupe-code --dedupe-geom`, out `data/filtered/cc_high_full`, nohup PID 53734, log `data/filtered/cc_high_full.log`.
+
+## 2026-10-04 — environment lesson: background exec starves, foreground works
+- Launched full cc-high filter (8177) via nohup/background: after 10min wall only 0:04 CPU, 0 bytes out, workers spawned but starved. Killed it (and strays), removed partials. Lesson: this environment suspends background process groups between tool calls — all heavy runs must be foreground with generous timeouts.
+- Added `--offset` to `cadgen.data.filter` (skip-first-N) for chunked/resumable runs; verified offset=2000 starts at cad-coder-high-2000. smoke_test caller uses keywords — unaffected.
+
+## 2026-10-04 — cc-high full filter (3 foreground chunks, 8 workers, dedupe-code+geom)
+- c1 (0–2800): ok=1691, dup_geom=747, multi=182, dup_code=159, invalid=17, empty=4; 1841s
+- c2 (2800–5600): ok=1657, dup_geom=790, multi=153, dup_code=186, invalid=11, empty=1, runtime=1, syntax=1; 1844s
+- c3 (5600–8177): ok=1514, dup_geom=664, multi=156, dup_code=224, invalid=17, empty=2; 1431s
+- Total: 4862/8177 passed (59.5%). Note: dedupe sets reset per chunk, so cross-chunk dups leak — group-aware split (model_path) still prevents train/test leakage; benchmark decontamination uses the same geom method at build time.
+- Next: t2cq 2k slice → merge chunks → group-aware pilot split → ollama baselines.
