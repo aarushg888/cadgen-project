@@ -59,3 +59,9 @@
 - c3 (5600–8177): ok=1514, dup_geom=664, multi=156, dup_code=224, invalid=17, empty=2; 1431s
 - Total: 4862/8177 passed (59.5%). Note: dedupe sets reset per chunk, so cross-chunk dups leak — group-aware split (model_path) still prevents train/test leakage; benchmark decontamination uses the same geom method at build time.
 - Next: t2cq 2k slice → merge chunks → group-aware pilot split → ollama baselines.
+
+## 2026-10-04 — t2cq 2k slice + pilot split (Stage 2 data acceptance met)
+- `python -m cadgen.data.filter --in data/raw/t2cq_train_adapted.jsonl --out data/filtered/t2cq_slice --limit 2000 --workers 8 --dedupe-code --dedupe-geom` → ok=1465 (0.73), multi_solid=271, dup_geom=136, dup_code=83, invalid=21, runtime=14, empty=9, forbidden=1; 1210s. Different profile vs cc-high: more multi-body, fewer dups.
+- Reject sampling: `forbidden` = `import os` (correct rejection, not adapter-stripped by design); runtimes = hallucinated APIs (`cutHole`, `fuse` method, `addLoft`, `hole(center=)`), invalid booleans (`BRep_API: command not done`), empty-stack errors. Filter works as designed — taxonomy noted for Stage 4.
+- Merged cc-high chunks → `data/filtered/cc_high_full/` (passed 4862, rejected 3315, stats.json recomputed with cross-chunk-dedupe caveat).
+- Pool 6327 (4862 cc-high + 1465 t2cq) → `python -m cadgen.data.split --val 0.1 --test 0.1 --seed 1234` → `data/splits/pilot/`: train 5052 / val 624 / test 651. Group overlap across splits: 0 (verified). Split ratio 80/10/10 chosen over default 96/2/2: 2% val (~120) too thin to catch overfitting in Stage 3. t2cq rows have no design key (id-bucketed, weaker) — noted; geometry dedupe already applied pre-split.

@@ -11,3 +11,5 @@
 - 2026-10-04: pilot 10% pass rate read as dedupe artifact (coarse 0.1-unit geom sig on normalized data), not a data-quality verdict; do not tune the filter against it — fix units first (D5).
 - 2026-10-04: D5 changed from "mm only; rescale or drop" to tag-and-separate (normalized tagged, mm enforced for synthetic/benchmark) — rescaling numbers in code but not prompts teaches mismatch; editing prompt numbers risks counts/angles. Nothing trained yet.
 - 2026-10-04: `_geom_sig` precision 1→3 decimals after proving 1577/2000 pilot rejects were false collisions (distinct code hashes); remaining 480 dups verified distinct-group.
+- 2026-10-04: pilot split 80/10/10 (not default 96/2/2) — 2% val is too thin to catch overfitting in Stage 3 pilot runs.
+- 2026-10-04: accept per-chunk dedupe leakage (sets reset across the 3 cc-high chunks); group-aware split still guarantees zero design overlap across train/val/test.
