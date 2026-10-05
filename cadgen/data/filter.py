@@ -35,11 +35,14 @@ def _geom_sig(r) -> tuple:
 
 
 def run_filter(inp: str, out_dir: str, workers: int = 4, timeout: float = 20.0, limit: int | None = None,
+               offset: int = 0,
                dedupe_code: bool = False, dedupe_geom: bool = False, require_single_solid: bool = True) -> dict:
     os.makedirs(out_dir, exist_ok=True)
     samples = []
     for i, d in enumerate(read_jsonl(inp)):
-        if limit and i >= limit:
+        if i < offset:
+            continue
+        if limit and len(samples) >= limit:
             break
         samples.append(Sample.from_dict(d))
 
@@ -99,12 +102,13 @@ def main():
     ap.add_argument("--workers", type=int, default=4)
     ap.add_argument("--timeout", type=float, default=20.0)
     ap.add_argument("--limit", type=int, default=None)
+    ap.add_argument("--offset", type=int, default=0, help="skip first N input rows (chunked/resumable runs)")
     ap.add_argument("--dedupe-code", action="store_true")
     ap.add_argument("--dedupe-geom", action="store_true")
     ap.add_argument("--allow-multi-solid", action="store_true")
     a = ap.parse_args()
-    print(json.dumps(run_filter(a.inp, a.out, a.workers, a.timeout, a.limit, a.dedupe_code, a.dedupe_geom,
-                                not a.allow_multi_solid), indent=2))
+    print(json.dumps(run_filter(a.inp, a.out, a.workers, a.timeout, a.limit, a.offset, a.dedupe_code,
+                                a.dedupe_geom, not a.allow_multi_solid), indent=2))
 
 
 if __name__ == "__main__":
