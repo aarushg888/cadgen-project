@@ -27,7 +27,11 @@ def _code_hash(code: str) -> str:
 
 
 def _geom_sig(r) -> tuple:
-    return (round(r.volume, 1), tuple(sorted(round(x, 1) for x in r.bbox)), r.n_faces)
+    # 3-decimal precision: 1-decimal rounding collapses distinct small
+    # (e.g. normalized-unit) parts into one signature and mass-rejects good
+    # data (2026-10-04 pilot: 1577/2000 false dup_geometry). Exact duplicates
+    # still match; near-duplicate *prompt* detection is separate future work.
+    return (round(r.volume, 3), tuple(sorted(round(x, 3) for x in r.bbox)), r.n_faces)
 
 
 def run_filter(inp: str, out_dir: str, workers: int = 4, timeout: float = 20.0, limit: int | None = None,

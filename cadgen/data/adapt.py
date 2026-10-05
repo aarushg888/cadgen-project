@@ -81,6 +81,8 @@ def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--in", dest="inp", required=True)
     ap.add_argument("--out", required=True)
+    ap.add_argument("--units", default="unknown",
+                    help="unit tag for all rows (e.g. normalized, mm); stored in meta")
     args = ap.parse_args()
     rows, changed = [], 0
     for d in read_jsonl(args.inp):
@@ -88,10 +90,10 @@ def main():
         if notes:
             changed += 1
         meta = dict(d.get("meta") or {})
-        meta.update({"raw_code": d["code"], "adapted": notes})
+        meta.update({"raw_code": d["code"], "adapted": notes, "units": args.units})
         rows.append({**d, "code": new_code, "meta": meta})
     n = write_jsonl(args.out, rows)
-    print(f"wrote {n} samples ({changed} adapted) -> {args.out}")
+    print(f"wrote {n} samples ({changed} adapted, units={args.units}) -> {args.out}")
 
 
 if __name__ == "__main__":

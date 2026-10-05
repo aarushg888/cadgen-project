@@ -14,7 +14,7 @@ decisions:            # see PLAN.md section 6
   D2_license_target: "permissive if data audit allows"
   D3_base_model: "Qwen2.5-Coder-7B-Instruct (prototype on 1.5B-3B first); re-check newer open coder models"
   D4_hardware: "M4 MacBook Air 24GB: prototype 1.5B-3B locally with MLX; rent CUDA GPU for 7B SFT and RL"
-  D5_units: "mm only; rescale or drop normalized-unit samples"
+  D5_units: "tag-and-separate: normalized-unit sources tagged meta.units=normalized and kept separate from mm data (rescaling code+prompt numbers jointly is unsafe: counts/angles would corrupt); mm-only contract enforced for synthetic + benchmark"
   D6_name: cadgen
 sandbox:
   timeout_s: 20
