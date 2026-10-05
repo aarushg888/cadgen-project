@@ -65,3 +65,9 @@
 - Reject sampling: `forbidden` = `import os` (correct rejection, not adapter-stripped by design); runtimes = hallucinated APIs (`cutHole`, `fuse` method, `addLoft`, `hole(center=)`), invalid booleans (`BRep_API: command not done`), empty-stack errors. Filter works as designed — taxonomy noted for Stage 4.
 - Merged cc-high chunks → `data/filtered/cc_high_full/` (passed 4862, rejected 3315, stats.json recomputed with cross-chunk-dedupe caveat).
 - Pool 6327 (4862 cc-high + 1465 t2cq) → `python -m cadgen.data.split --val 0.1 --test 0.1 --seed 1234` → `data/splits/pilot/`: train 5052 / val 624 / test 651. Group overlap across splits: 0 (verified). Split ratio 80/10/10 chosen over default 96/2/2: 2% val (~120) too thin to catch overfitting in Stage 3. t2cq rows have no design key (id-bucketed, weaker) — noted; geometry dedupe already applied pre-split.
+
+## 2026-10-04 — zero-shot baseline: ornith:9B on seed tasks (n=1 effective)
+- Ollama serves `ornith:9B` (qwen35 9B Q4_K_M). First try (4 parallel × n=4 via run_eval --model) died with openai.APITimeoutError — 9B+thinking on a fanless Air cannot take parallel load. Single probe: 42.7s, correct cylinder code.
+- Fell back to sequential generation (12 tasks × n=4 requested) → discovered ollama's OpenAI endpoint ignores `n` and returns 1 choice. Result: runs/ornith_zero_gens.jsonl has 12 rows (1/task). Fences present in only 9/12 task outputs; extract_code whole-text fallback handled the rest.
+- `python -m cadgen.eval.run_eval --tasks benchmark/seed_tasks.jsonl --generations runs/ornith_zero_gens.jsonl --out runs/eval_ornith_zero` → n=12, exec_rate 0.333 (4/12), geo_pass 0.25 (3/12), mean_iou 0.28, pass@1 0.25. Statuses: ok 4, runtime_error 5, no_result 3.
+- Failure taxonomy (zero-shot, feeds Stage 4): hallucinated APIs (Solid.union, Workplane.moveZ, `python` NameError from prose leak), Wire/Solid→vector conversion errors, no `result` variable ×3, one executes-but-wrong (hex_nut IoU 0.36).

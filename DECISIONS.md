@@ -13,3 +13,4 @@
 - 2026-10-04: `_geom_sig` precision 1→3 decimals after proving 1577/2000 pilot rejects were false collisions (distinct code hashes); remaining 480 dups verified distinct-group.
 - 2026-10-04: pilot split 80/10/10 (not default 96/2/2) — 2% val is too thin to catch overfitting in Stage 3 pilot runs.
 - 2026-10-04: accept per-chunk dedupe leakage (sets reset across the 3 cc-high chunks); group-aware split still guarantees zero design overlap across train/val/test.
+- 2026-10-04: seed baseline is n=1 (ollama ignores `n`; parallel gen overloads the Air). pass@k>1 deferred to Stage 5 real-benchmark eval; few-shot harness support also deferred there (needs contamination-safe example selection, not seed self-examples).
