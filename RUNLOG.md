@@ -71,3 +71,10 @@
 - Fell back to sequential generation (12 tasks × n=4 requested) → discovered ollama's OpenAI endpoint ignores `n` and returns 1 choice. Result: runs/ornith_zero_gens.jsonl has 12 rows (1/task). Fences present in only 9/12 task outputs; extract_code whole-text fallback handled the rest.
 - `python -m cadgen.eval.run_eval --tasks benchmark/seed_tasks.jsonl --generations runs/ornith_zero_gens.jsonl --out runs/eval_ornith_zero` → n=12, exec_rate 0.333 (4/12), geo_pass 0.25 (3/12), mean_iou 0.28, pass@1 0.25. Statuses: ok 4, runtime_error 5, no_result 3.
 - Failure taxonomy (zero-shot, feeds Stage 4): hallucinated APIs (Solid.union, Workplane.moveZ, `python` NameError from prose leak), Wire/Solid→vector conversion errors, no `result` variable ×3, one executes-but-wrong (hex_nut IoU 0.36).
+
+## 2026-10-04 — benchmark v1 built (Stage 2 acceptance: 243 tasks)
+- Chose template-generated over LLM-synth (documented in README + DECISIONS): 300 local generations ≈ 4h for ~15% end yield; templates emit exact (prompt, code, expected-geometry) in seconds and still pass every gate.
+- Wrote `benchmark/build_v1.py`: 18 emitters (10 mechanical, 8 consumer/arch), 4 phrasing styles, analytic bbox+volume per template; gates = sandbox filter (dedupe) → bbox_match 10% + volume_match 25% vs expected → decontam vs pilot train (prompt exact/Jaccard 0.85/geom-sig).
+- Debugging found by gates (all fixed, verified by measurement): polygon(6,d) circumscribes (AF = across corners; measured bbox [14, 12.12, 6], vol 763.8); shelf had an invalid leading-dot continuation (syntax_error → 0 survivors before fix).
+- Full run `--n-per-tier 120 --seed 7`: 360 candidates → gate1 ok 243 (+2 multi, 113 dup_code, 2 dup_geom) → gate2 243/243 → decontam 0 rejects → final 243 (T1 93 / T2 70 / T3 80, all 18 families). `benchmark/tasks.jsonl` + `benchmark/report.json`.
+- Spot-check 40/243 by eye: 39 correct (1 template edge: bolt circle grazing center hole, bench-1-008) → benchmark error ≈ 2.5%, recorded in STATUS.md.
