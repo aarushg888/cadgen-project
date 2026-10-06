@@ -3,6 +3,7 @@ __pycache__/
 .venv/
 data/raw/
 data/filtered/
+data/splits/
 runs/
 *.brep
 *.stl
