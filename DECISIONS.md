@@ -15,3 +15,5 @@
 - 2026-10-04: accept per-chunk dedupe leakage (sets reset across the 3 cc-high chunks); group-aware split still guarantees zero design overlap across train/val/test.
 - 2026-10-04: seed baseline is n=1 (ollama ignores `n`; parallel gen overloads the Air). pass@k>1 deferred to Stage 5 real-benchmark eval; few-shot harness support also deferred there (needs contamination-safe example selection, not seed self-examples).
 - 2026-10-04: benchmark v1 is template-generated (not LLM-synth): 4h local generation for ~15% yield is infeasible on this machine; all AGENTS.md gates still run (exec, consistency, decontam). LLM-diversified v2 later.
+- 2026-10-07: bench baselines use think:false (30x faster; thinking traces unaffordable at 243 tasks). Documented as a conditions change vs the thinking-enabled seed baseline; Stage 5 same-run comparisons will share one config.
+- 2026-10-07: my ollama server moved to :11435 (port 11434 taken by another user's server — leave it alone); ornith-8k = same 9B weights, num_ctx 8192.

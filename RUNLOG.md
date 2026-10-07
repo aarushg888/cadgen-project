@@ -78,3 +78,14 @@
 - Debugging found by gates (all fixed, verified by measurement): polygon(6,d) circumscribes (AF = across corners; measured bbox [14, 12.12, 6], vol 763.8); shelf had an invalid leading-dot continuation (syntax_error → 0 survivors before fix).
 - Full run `--n-per-tier 120 --seed 7`: 360 candidates → gate1 ok 243 (+2 multi, 113 dup_code, 2 dup_geom) → gate2 243/243 → decontam 0 rejects → final 243 (T1 93 / T2 70 / T3 80, all 18 families). `benchmark/tasks.jsonl` + `benchmark/report.json`.
 - Spot-check 40/243 by eye: 39 correct (1 template edge: bolt circle grazing center hole, bench-1-008) → benchmark error ≈ 2.5%, recorded in STATUS.md.
+
+## 2026-10-07 — infra fight: ollama 256k-ctx wedged, moved to :11435 + think:false
+- Symptom: gens slowed 43s → 2.6min, then HF pull + probes hung. Root causes found: (1) ornith:9B loaded with 262144 ctx → llama-server held 13.4GB/53% RAM, swap thrash; (2) backend wedged in "Stopping..." (swap-thrash victim).
+- Recovery: `ollama stop` hung → killed worker; old `ollama serve` (mine, Sunday) replaced. NOTE: port 11434 is now held by sridhargutha108's server — mine runs on 11435 (`OLLAMA_HOST=127.0.0.1:11435`). Do NOT kill their process. The old server's ornith:9B/8k manifests are gone with it; recreated ornith-8k (num_ctx 8192) from the surviving GGUF blob in ~/.ollama via FROM-local-file (deleted 5.2GB /tmp copy after).
+- Speed fix: native-API `think:false` → 56 tokens in 3.6s eval (30x). Extended `ChatClient(think=...)` (native /api/chat when set; OpenAI path otherwise) + `tests/test_llm.py` (2 tests) + script flags `--think/--max-tokens`. Baseline config: ornith-8k, temp 0.2, max_tokens 1024, think false. DIFFERS from seed n=1 baseline (thinking-enabled) — noted, not mixed.
+
+## 2026-10-07 — 243-task zero-shot baseline (ornith-8k, think:false, n=1)
+- 3 sequential chunks (80/80/83): runs/ornith8k_bench_gens.jsonl (243 rows) → `run_eval --workers 8` → runs/eval_bench_ornith8k/.
+- Summary: exec 0.218 [0.165, 0.272], geo_pass 0.107 [0.070, 0.148] (bootstrap 10k), mean IoU 0.110, pass@1 0.107. Statuses: runtime 178, ok 53, forbidden 8 (all `__import__`), syntax 4 (long/truncated).
+- Per tier: T1 exec 0.280/geo 0.151, T2 0.214/0.157, T3 0.150/0.013 — tiers discriminate as designed (consumer/arch crushes zero-shot).
+- Failure modes: TypeError 70, ValueError 43, NameError 35 (incl. `show_object` leaks), AttributeError 28 (hallucinated APIs). Targets (0.80/0.60) sit far above baseline upper bounds — headroom confirmed.
