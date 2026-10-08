@@ -21,7 +21,7 @@ from collections import defaultdict
 from concurrent.futures import ThreadPoolExecutor
 
 from .. import metrics as M
-from ..prompts import build_messages
+from ..prompts import build_fewshot_messages, build_messages
 from ..sandbox import SandboxPool
 from ..schema import read_jsonl
 from ..textutil import extract_code
@@ -34,11 +34,13 @@ def load_generations(path: str) -> dict[str, list[str]]:
     return out
 
 
-def generate_live(tasks, model, base_url, n, temperature) -> dict[str, list[str]]:
+def generate_live(tasks, model, base_url, n, temperature, examples=None) -> dict[str, list[str]]:
     from ..llm import ChatClient
     client = ChatClient(model, base_url, temperature=temperature)
+    msgs = (lambda t: build_fewshot_messages(examples, t["prompt"])) if examples else \
+           (lambda t: build_messages(t["prompt"]))
     with ThreadPoolExecutor(4) as ex:
-        res = list(ex.map(lambda t: client.complete(build_messages(t["prompt"]), n=n), tasks))
+        res = list(ex.map(lambda t: client.complete(msgs(t), n=n), tasks))
     return {str(t["id"]): r for t, r in zip(tasks, res)}
 
 
@@ -111,12 +113,16 @@ def main():
     ap.add_argument("-n", type=int, default=1)
     ap.add_argument("--temperature", type=float, default=0.2)
     ap.add_argument("--workers", type=int, default=4)
+    ap.add_argument("--few-shot-from", default=None,
+                    help="jsonl with {prompt, code} rows used as demonstrations (must be outside the eval set)")
+    ap.add_argument("--few-shot", type=int, default=3)
     a = ap.parse_args()
     tasks = list(read_jsonl(a.tasks))
     if a.generations:
         gens = load_generations(a.generations)
     elif a.model:
-        gens = generate_live(tasks, a.model, a.base_url, a.n, a.temperature)
+        examples = list(read_jsonl(a.few_shot_from))[:a.few_shot] if a.few_shot_from else None
+        gens = generate_live(tasks, a.model, a.base_url, a.n, a.temperature, examples)
     else:
         ap.error("give --generations or --model")
     ks = tuple(k for k in (1, 4, 8) if k <= max(1, a.n))

@@ -14,7 +14,7 @@ import json
 import time
 
 from cadgen.llm import ChatClient
-from cadgen.prompts import build_messages
+from cadgen.prompts import build_fewshot_messages, build_messages
 from cadgen.schema import read_jsonl
 
 
@@ -28,6 +28,8 @@ def main():
     ap.add_argument("--max-tokens", type=int, default=1024)
     ap.add_argument("--think", choices=["true", "false"], default=None,
                     help="native-API thinking toggle (ollama only); bench baseline uses false for speed")
+    ap.add_argument("--few-shot-from", default=None)
+    ap.add_argument("--few-shot", type=int, default=3)
     ap.add_argument("--offset", type=int, default=0)
     ap.add_argument("--limit", type=int, default=None)
     a = ap.parse_args()
@@ -43,13 +45,15 @@ def main():
     client = ChatClient(a.model, a.base_url, temperature=a.temperature,
                         max_tokens=a.max_tokens,
                         think={"true": True, "false": False}.get(a.think))
+    examples = list(read_jsonl(a.few_shot_from))[:a.few_shot] if a.few_shot_from else None
     n_new, t0 = 0, time.time()
     with open(a.out, "a") as f:
         for t in tasks:
             if t["id"] in done:
                 continue
+            msgs = build_fewshot_messages(examples, t["prompt"]) if examples else build_messages(t["prompt"])
             try:
-                comp = client.complete(build_messages(t["prompt"]), n=1)[0]
+                comp = client.complete(msgs, n=1)[0]
             except Exception as e:  # noqa: BLE001 - timeout etc: record empty, keep going
                 print(f"{t['id']} FAILED {type(e).__name__}: {str(e)[:100]}", flush=True)
                 comp = ""
