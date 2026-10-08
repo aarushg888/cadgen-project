@@ -19,12 +19,12 @@ Last updated: 2026-10-04. Stage: 2 DONE (data + benchmark); Stage 3 blocked on l
 - Gates all machine-run: exec+dedupe → bbox 10% + volume 25% vs template-expected → decontam vs pilot train (0 rejects)
 - Human spot-check 40/243: 39 correct → benchmark error ≈ 2.5% (1 template edge: bolt circle grazing center hole)
 
-## Baselines (v1 243-task benchmark — the number that matters)
-- ornith-8k zero-shot, n=1, think:false, temp 0.2 (`runs/eval_bench_ornith8k/`): exec 0.218 [0.165, 0.272], geo_pass 0.107 [0.070, 0.148] (bootstrap 10k), mean IoU 0.110
-- Per tier: T1 0.280/0.151, T2 0.214/0.157, T3 0.150/0.013 (exec/geo) — tiers discriminate; consumer/arch is the hard tier
-- Failure modes: TypeError 70, ValueError 43, NameError 35, AttributeError 28, forbidden 8 (`__import__`), syntax 4
-- Seed-12 baseline (thinking-enabled, n=1): exec 0.333, geo 0.25 — different conditions, not directly comparable
-- Targets (0.80/0.60) far above baseline upper bounds — headroom confirmed
+## Baselines (v1 243-task benchmark — the numbers that matter)
+- ornith-8k zero-shot, n=1, think:false (`runs/eval_bench_ornith8k/`): exec 0.218 [0.165, 0.272], geo 0.107 [0.070, 0.148], mean IoU 0.110
+- ornith-8k FEW-SHOT (3 seed examples), same gen config (`runs/eval_bench_ornith8k_fewshot/`, scored in 2 slices + merged): exec 0.650 [0.588, 0.712], geo 0.325 [0.267, 0.383], mean IoU 0.418
+- Per tier few-shot (exec/geo): T1 0.699/0.376, T2 0.657/0.400, T3 0.588/0.200
+- Zero vs few-shot CIs do not overlap. THE BAR (ship criterion): beat few-shot exec 0.65 / geo 0.33 with non-overlapping CIs. Targets (0.80/0.60) stand.
+- Failure modes (few-shot): runtime 74, invalid 8, syntax 2, empty 1
 
 ## Env notes (2026-10-07)
 - My ollama server is on :11435 (11434 belongs to another user — do not touch); model ornith-8k (9B Q4, ctx 8192)

@@ -89,3 +89,9 @@
 - Summary: exec 0.218 [0.165, 0.272], geo_pass 0.107 [0.070, 0.148] (bootstrap 10k), mean IoU 0.110, pass@1 0.107. Statuses: runtime 178, ok 53, forbidden 8 (all `__import__`), syntax 4 (long/truncated).
 - Per tier: T1 exec 0.280/geo 0.151, T2 0.214/0.157, T3 0.150/0.013 — tiers discriminate as designed (consumer/arch crushes zero-shot).
 - Failure modes: TypeError 70, ValueError 43, NameError 35 (incl. `show_object` leaks), AttributeError 28 (hallucinated APIs). Targets (0.80/0.60) sit far above baseline upper bounds — headroom confirmed.
+
+## 2026-10-08 — few-shot baseline on 243-bench (3 seed examples, same gen config)
+- Full-run scoring kept dying at the 60-min tool timeout: NOT a hang (verified piece by piece + 82-task instrumented run) — few-shot outputs are longer/more complex, ~9-40s/task end-to-end. Scored in 2 slices (122 + 121) and merged with identical formulas + bootstrap 10k.
+- Merged (`runs/eval_bench_ornith8k_fewshot/`): exec 0.650 [0.588, 0.712], geo_pass 0.325 [0.267, 0.383], mean IoU 0.418. Statuses: ok 158, runtime 74, invalid 8, syntax 2, empty 1.
+- Per tier (exec/geo): T1 0.699/0.376, T2 0.657/0.400, T3 0.588/0.200 (T3 geo 0.013 → 0.200 with examples).
+- vs zero-shot (0.218 [0.165,0.272] / 0.107 [0.070,0.148]): non-overlapping CIs — the bar for Stage 5 is the FEW-SHOT number (exec 0.65 / geo 0.33), a much tougher target that reframes headroom.
