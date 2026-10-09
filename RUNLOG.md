@@ -95,3 +95,7 @@
 - Merged (`runs/eval_bench_ornith8k_fewshot/`): exec 0.650 [0.588, 0.712], geo_pass 0.325 [0.267, 0.383], mean IoU 0.418. Statuses: ok 158, runtime 74, invalid 8, syntax 2, empty 1.
 - Per tier (exec/geo): T1 0.699/0.376, T2 0.657/0.400, T3 0.588/0.200 (T3 geo 0.013 → 0.200 with examples).
 - vs zero-shot (0.218 [0.165,0.272] / 0.107 [0.070,0.148]): non-overlapping CIs — the bar for Stage 5 is the FEW-SHOT number (exec 0.65 / geo 0.33), a much tougher target that reframes headroom.
+
+## 2026-10-08 — synthetic mm training data (own license, 7372 samples)
+- Narrow dim pools saturated (4000 draws → 663 unique, 7% yield). Added `wide` randint ranges with computed validity guards to all 18 emitters in benchmark/build_v1.py (`--wide` flag; benchmark default unchanged, determinism spot-verified). New scripts/build_synth_train.py reuses emitters + gates, decontaminates vs benchmark (code-exact + prompt Jaccard 0.85).
+- Wide probe (60): 60/60 exec, 60/60 consistency, 57 kept. Full: seed21 3762/4000 + seed22 3777/4000 → merged 7372 (167 cross-dupes dropped) → data/raw/synth_train.jsonl, all units=mm, license=own (mech 3876 / consumer 2179 / arch 1317).

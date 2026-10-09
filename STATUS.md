@@ -10,9 +10,10 @@ Last updated: 2026-10-04. Stage: 2 DONE (data + benchmark); Stage 3 blocked on l
 - exec ≥ 80%, geo_pass ≥ 60% on the 243-task benchmark; beat few-shot base with non-overlapping CI
 
 ## Data
-- CAD-Coder + Text-to-CadQuery acquired, ingested (8177 + 99236), adapted, filtered; both in `data/LICENSES.md` with caveats; license escalation open — NO TRAINING until resolved
+- CAD-Coder + Text-to-CadQuery acquired, ingested (8177 + 99236), adapted, filtered; both in `data/LICENSES.md` with caveats; license escalation open — third-party data NOT cleared for training
+- Own synthetic mm training pool `data/raw/synth_train.jsonl`: 7372 rows, units=mm, license=own (mech 3876 / consumer 2179 / arch 1317), decontaminated vs benchmark — CLEARED for training whenever Stage 3 starts
 - Pilot `data/splits/pilot/`: train 5052 / val 624 / test 651 (all normalized); zero group overlap
-- Harness green: `pytest -q` 27 passed (incl. adapt 4 + filter 3); smoke PASSED
+- Harness green: `pytest -q` 31 passed; smoke PASSED
 
 ## Benchmark v1: `benchmark/tasks.jsonl` — 243 tasks, AUTOMATED-QUALITY
 - T1 93 (template mechanical) / T2 70 (novel phrasing) / T3 80 (consumer/arch); 18 families; all `result`, mm, single solid

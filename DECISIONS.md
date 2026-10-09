@@ -18,3 +18,4 @@
 - 2026-10-07: bench baselines use think:false (30x faster; thinking traces unaffordable at 243 tasks). Documented as a conditions change vs the thinking-enabled seed baseline; Stage 5 same-run comparisons will share one config.
 - 2026-10-07: my ollama server moved to :11435 (port 11434 taken by another user's server — leave it alone); ornith-8k = same 9B weights, num_ctx 8192.
 - 2026-10-08: Stage 5 comparison bar is the few-shot baseline (exec 0.65/geo 0.33, CIs above), not zero-shot — beating it with non-overlapping CIs is the ship criterion per AGENTS.md.
+- 2026-10-08: synth-train uses wide dims (narrow pools saturate at ~700 uniques); benchmark build stays narrow for reproducibility. Synth is own-license mm data — the D2-permissive/D5-mm track, trainable regardless of the Text2CAD escalation outcome.
