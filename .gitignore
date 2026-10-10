@@ -4,6 +4,7 @@ __pycache__/
 data/raw/
 data/filtered/
 data/splits/
+data/mlx/
 runs/
 *.brep
 *.stl

@@ -31,7 +31,7 @@ Last updated: 2026-10-04. Stage: 2 DONE (data + benchmark); Stage 3 blocked on l
 - My ollama server is on :11435 (11434 belongs to another user — do not touch); model ornith-8k (9B Q4, ctx 8192)
 - Harness green: `pytest -q` 29 passed; smoke PASSED
 
-## Open questions / next
-- LICENSE escalation blocks Stage 3 (sft_mlx.py + mlx-lm + 50-sample overfit)
-- Unblocked next: Stage 5-style baseline on the 243-task benchmark (ornith zero-shot; needs ~hours: 243 gens × ~45s ≈ 3h sequential — chunk it), few-shot harness support, synthetic mm-track data (2.5)
-- Open a PR for the stage-2 branch once the human merges #1 (stacked)
+## Stage 3 (SFT) — overfit PASSED on own data, pilot next
+- Stack: mlx-lm 0.32 LoRA on Qwen2.5-Coder-1.5B-4bit (839MB); recipe rank32/scale2.0/drop0.05/lr1e-4/batch4/mask-prompt/all-layers (`cadgen/train/sft_mlx.py`)
+- Overfit-50: loss 1.477 → 0.000, 3/3 exact reproductions. Third-party data still NOT cleared (escalation open).
+- Next: pilot run on synth train (5922 rows, 2 epochs) → eval on 243-bench vs few-shot bar (0.65/0.33)

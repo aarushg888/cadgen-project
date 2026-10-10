@@ -99,3 +99,11 @@
 ## 2026-10-08 — synthetic mm training data (own license, 7372 samples)
 - Narrow dim pools saturated (4000 draws → 663 unique, 7% yield). Added `wide` randint ranges with computed validity guards to all 18 emitters in benchmark/build_v1.py (`--wide` flag; benchmark default unchanged, determinism spot-verified). New scripts/build_synth_train.py reuses emitters + gates, decontaminates vs benchmark (code-exact + prompt Jaccard 0.85).
 - Wide probe (60): 60/60 exec, 60/60 consistency, 57 kept. Full: seed21 3762/4000 + seed22 3777/4000 → merged 7372 (167 cross-dupes dropped) → data/raw/synth_train.jsonl, all units=mm, license=own (mech 3876 / consumer 2179 / arch 1317).
+
+## 2026-10-09 — Stage 3 overfit-50 PASSED (own synth data, 1.5B QLoRA)
+- Env: pip install mlx mlx-lm (0.32.0); base mlx-community/Qwen2.5-Coder-1.5B-Instruct-4bit (839MB, same family as the 7B target per D3); token histogram of synth train: median 146 / p95 276 / max 395 → max-seq-length 2048 truncates nothing.
+- New cadgen/train/sft_mlx.py (MLX-LM LoRA wrapper: --mask-prompt, num-layers -1, YAML lora config, --overfit/--epochs/--resume modes, --dry-run).
+- Gotcha 1: flat YAML rank/scale/dropout keys are SILENTLY IGNORED — mlx-lm 0.32 needs nested `lora_parameters:` (first run trained rank 8 despite asking 32). Fixed + verified ("rank 32" in header).
+- Gotcha 2: scale=20 (mlx default) + lr 2e-4 NaN'd at iter 20 (23.5 → nan). Stable: scale=2.0 + lr=1e-4 (30-iter probe 1.48 → 0.10). Culprit unisolated; working point logged in sft_mlx.py.
+- Full overfit (50 samples, 300 iters, batch 4): train loss 1.477 → 0.000 by iter 230, flat 0.000 to 300. Checkpoints every 50 under runs/overfit50/adapter/ (gitignored).
+- Reproduction check (mlx_lm generate + adapter, temp 0, 3 train prompts): 3/3 EXACT code match. Formatting/masking/pipeline proven — pilot run unblocked on own data.
