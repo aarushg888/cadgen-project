@@ -21,3 +21,4 @@
 - 2026-10-08: synth-train uses wide dims (narrow pools saturate at ~700 uniques); benchmark build stays narrow for reproducibility. Synth is own-license mm data — the D2-permissive/D5-mm track, trainable regardless of the Text2CAD escalation outcome.
 - 2026-10-09: Stage 3 starts on OWN synth data (license entry marked trainable) — third-party training still blocked on escalation. Base = Qwen2.5-Coder-1.5B-4bit (same family as 7B target; Qwen3-1.7B MLX exists but family transfer matters more).
 - 2026-10-09: overfit recipe rank 32 / scale 2.0 / dropout 0.05 / lr 1e-4 / batch 4 / mask-prompt / all layers; nested lora_parameters required by mlx-lm 0.32.
+- 2026-10-10: pilot SFT via banked micro-chunks (save-every 25) through daytime contention; aim ~1500 iters (1 epoch) then eval vs few-shot bar before deciding on epoch 2.

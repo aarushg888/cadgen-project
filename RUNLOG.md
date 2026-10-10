@@ -107,3 +107,11 @@
 - Gotcha 2: scale=20 (mlx default) + lr 2e-4 NaN'd at iter 20 (23.5 → nan). Stable: scale=2.0 + lr=1e-4 (30-iter probe 1.48 → 0.10). Culprit unisolated; working point logged in sft_mlx.py.
 - Full overfit (50 samples, 300 iters, batch 4): train loss 1.477 → 0.000 by iter 230, flat 0.000 to 300. Checkpoints every 50 under runs/overfit50/adapter/ (gitignored).
 - Reproduction check (mlx_lm generate + adapter, temp 0, 3 train prompts): 3/3 EXACT code match. Formatting/masking/pipeline proven — pilot run unblocked on own data.
+
+## 2026-10-10 — pilot throughput collapse; switching to banked micro-chunks
+- Chunk 1: 600 iters/hr. Chunks 2/2b: ~20-130 iters/hr, zero new checkpoints (save-every 150/50 never reached; ~250 iters of compute lost). No thermal warnings; cause is system contention (contactsd 92%, spotlight indexing, load 6-10, daytime user activity) + opencode host itself ~95%.
+- Strategy: iters 200/call with --save-every 25 so every call banks progress; resume from latest checkpoint. Total target ~1500 iters (1 epoch) before first eval, then decide.
+
+## 2026-10-10 — pilot chunking through contention + first SFT signal check
+- Chunk 2/2b slow (~20-130 iters/hr vs 600): daytime system contention, no thermal flags. Banked micro-chunks (save-every 25); moved per-chunk ckpts aside to avoid iter-number collisions on resume.
+- Wrote scripts/gen_mlx_eval.py (chat-template + sampler; mlx generate() takes sampler=, not temp=). Probe: fine-tuned adapter emits clean fenced `result` code.
