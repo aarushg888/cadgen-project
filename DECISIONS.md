@@ -22,3 +22,4 @@
 - 2026-10-09: Stage 3 starts on OWN synth data (license entry marked trainable) — third-party training still blocked on escalation. Base = Qwen2.5-Coder-1.5B-4bit (same family as 7B target; Qwen3-1.7B MLX exists but family transfer matters more).
 - 2026-10-09: overfit recipe rank 32 / scale 2.0 / dropout 0.05 / lr 1e-4 / batch 4 / mask-prompt / all layers; nested lora_parameters required by mlx-lm 0.32.
 - 2026-10-10: pilot SFT via banked micro-chunks (save-every 25) through daytime contention; aim ~1500 iters (1 epoch) then eval vs few-shot bar before deciding on epoch 2.
+- 2026-10-10: first SFT eval at 600 iters (0.4 epochs) already beats the few-shot bar with non-overlapping CIs; continue training loop (epoch 2 / rejection sampling on volume-match failures) before ship per §4 loop budget.

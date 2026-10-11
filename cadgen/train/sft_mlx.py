@@ -46,7 +46,7 @@ def build_cmd(a) -> tuple[list[str], dict]:
     else:
         n_train = sum(1 for _ in open(os.path.join(a.data, "train.jsonl")))
         iters = a.iters or max(1, int(a.epochs * n_train / a.batch_size))
-        eval_every, val_batches = a.steps_per_eval, -1
+        eval_every, val_batches = a.steps_per_eval, a.val_batches
     cmd = [sys.executable, "-m", "mlx_lm", "lora",
            "--model", a.model, "--data", a.data, "--train",
            "--mask-prompt", "--fine-tune-type", "lora",
@@ -84,6 +84,8 @@ def main():
     ap.add_argument("--save-every", type=int, default=100)
     ap.add_argument("--steps-per-report", type=int, default=10)
     ap.add_argument("--steps-per-eval", type=int, default=50)
+    ap.add_argument("--val-batches", type=int, default=20,
+                    help="validation batches per eval (-1 = full set; slow)")
     ap.add_argument("--grad-checkpoint", action="store_true")
     ap.add_argument("--resume", default=None, help="adapter .safetensors to resume from (chunked long runs)")
     ap.add_argument("--dry-run", action="store_true")

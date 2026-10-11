@@ -115,3 +115,10 @@
 ## 2026-10-10 — pilot chunking through contention + first SFT signal check
 - Chunk 2/2b slow (~20-130 iters/hr vs 600): daytime system contention, no thermal flags. Banked micro-chunks (save-every 25); moved per-chunk ckpts aside to avoid iter-number collisions on resume.
 - Wrote scripts/gen_mlx_eval.py (chat-template + sampler; mlx generate() takes sampler=, not temp=). Probe: fine-tuned adapter emits clean fenced `result` code.
+
+## 2026-10-10 — FIRST SFT SIGNAL: 600 iters beats the few-shot bar
+- Evals are slow on SFT outputs (~9-46s/task IoU on complex shapes; two 60-min timeouts on 122-task slices) → scored in 3×81 slices, merged with identical formulas + bootstrap 10k.
+- Merged (`runs/eval_sft_v1/`, adapter at 600 iters / 0.4 epochs, zero-shot prompting): exec 1.000 [1.0,1.0], geo 0.922 [0.885,0.955], mean IoU 0.910. T1 1.0/1.0, T2 1.0/0.957, T3 1.0/0.80.
+- vs few-shot bar (0.650/0.325): non-overlapping CIs — BAR BEATEN. vs pre-registered targets (0.80/0.60): geo met.
+- Failure mode is uniform and nameable: all 19 fails are bbox-TRUE + volume-FALSE (right outer dims, wrong subtractive features; e.g. bench-3-243 IoU 0.84 but vol off). Next loop lever per §4: rejection-sampling on volume-match, or epoch 2.
+- Caveats: 0.4 epochs only; train/bench share template families (T1 in-distribution by design); comparisons across runs share bench + gen config but not invocation.

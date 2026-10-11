@@ -31,7 +31,9 @@ Last updated: 2026-10-04. Stage: 2 DONE (data + benchmark); Stage 3 blocked on l
 - My ollama server is on :11435 (11434 belongs to another user — do not touch); model ornith-8k (9B Q4, ctx 8192)
 - Harness green: `pytest -q` 29 passed; smoke PASSED
 
-## Stage 3 (SFT) — overfit PASSED on own data, pilot next
-- Stack: mlx-lm 0.32 LoRA on Qwen2.5-Coder-1.5B-4bit (839MB); recipe rank32/scale2.0/drop0.05/lr1e-4/batch4/mask-prompt/all-layers (`cadgen/train/sft_mlx.py`)
-- Overfit-50: loss 1.477 → 0.000, 3/3 exact reproductions. Third-party data still NOT cleared (escalation open).
-- Next: pilot run on synth train (5922 rows, 2 epochs) → eval on 243-bench vs few-shot bar (0.65/0.33)
+## Stage 3 (SFT) — FIRST SIGNAL: bar beaten at 600 iters, looping
+- Recipe rank32/scale2.0/drop0.05/lr1e-4/batch4/mask-prompt/all-layers; pilot train 5922 synth-mm rows
+- Overfit-50: loss → 0.000, 3/3 exact repros. Pilot: 600 iters banked (0.4 epochs; contention → micro-chunks + resume)
+- SFT eval (`runs/eval_sft_v1/`, zero-shot): exec 1.000 [1.0,1.0], geo 0.922 [0.885,0.955], IoU 0.910; T1 1.0/1.0, T2 1.0/0.957, T3 1.0/0.80
+- BAR BEATEN (few-shot 0.650/0.325, non-overlapping CIs); geo target 0.80 met. All 19 fails = right-bbox/wrong-volume → next lever: rejection sampling on volume-match, then epoch 2
+- Next: continue loop (§4) → Stage 6 ship (CLI, quantize, model card, PR). Third-party data still NOT cleared.
