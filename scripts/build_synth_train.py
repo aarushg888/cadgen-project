@@ -35,11 +35,20 @@ def main():
     ap.add_argument("--bench", default="benchmark/tasks.jsonl")
     ap.add_argument("--out", default="data/raw/synth_train.jsonl")
     ap.add_argument("--workers", type=int, default=8)
+    ap.add_argument("--only", default=None,
+                    help="comma-separated emitter names to draw from (targeted expansion)")
+    ap.add_argument("--extra-pool", default=None,
+                    help="extra jsonl to code-dedupe against (e.g. existing pool)")
     a = ap.parse_args()
     rng = random.Random(a.seed)
 
     cands, meta = [], {}
     pool = [(fn, s) for fn in TIER1 + TIER3 for s in STYLES3]
+    if a.only:
+        want = set(a.only.split(","))
+        pool = [(fn, s) for fn, s in pool if fn.__name__ in want]
+        assert pool, f"no emitters match {want}"
+    print(f"pool: {len(pool)} emitter-styles")
     for i in range(a.n):
         fn, style = rng.choice(pool)
         try:
@@ -73,17 +82,25 @@ def main():
     bench = list(read_jsonl(a.bench))
     bench_code = {_code_hash(b["code"]) for b in bench}
     bench_prompts = [_norm_prompt(b["prompt"]) for b in bench]
-    kept, n_code, n_prompt = [], 0, 0
+    if a.extra_pool:
+        extra_code = {_code_hash(r["code"]) for r in read_jsonl(a.extra_pool)}
+        print(f"extra-pool codes: {len(extra_code)}")
+    else:
+        extra_code = set()
+    kept, n_code, n_prompt, n_extra = [], 0, 0, 0
     for row in consistent:
         if _code_hash(row["code"]) in bench_code:
             n_code += 1
+            continue
+        if _code_hash(row["code"]) in extra_code:
+            n_extra += 1
             continue
         np_ = _norm_prompt(row["prompt"])
         if np_ in bench_prompts or max((_tok_jaccard(np_, tp) for tp in bench_prompts), default=0) >= 0.85:
             n_prompt += 1
             continue
         kept.append(row)
-    print(f"gate3 decontam-vs-bench: kept {len(kept)} (code-dup {n_code}, prompt-near-dup {n_prompt})")
+    print(f"gate3 decontam-vs-bench: kept {len(kept)} (code-dup {n_code}, extra-pool-dup {n_extra}, prompt-near-dup {n_prompt})")
     with open(a.out, "w") as f:
         for row in kept:
             f.write(json.dumps(row) + "\n")

@@ -122,3 +122,8 @@
 - vs few-shot bar (0.650/0.325): non-overlapping CIs — BAR BEATEN. vs pre-registered targets (0.80/0.60): geo met.
 - Failure mode is uniform and nameable: all 19 fails are bbox-TRUE + volume-FALSE (right outer dims, wrong subtractive features; e.g. bench-3-243 IoU 0.84 but vol off). Next loop lever per §4: rejection-sampling on volume-match, or epoch 2.
 - Caveats: 0.4 epochs only; train/bench share template families (T1 in-distribution by design); comparisons across runs share bench + gen config but not invocation.
+
+## 2026-10-10 — loop unit: targeted hole-family expansion + 200 more iters
+- Hypothesis: all 19 bench fails are vol-off on subtractive features → add hole/cutout-family rows. scripts/build_synth_train.py gained --only/--extra-pool: 4000 draws → 3240 kept (338 overlapped old pool). Merged pool 10612 (mech 6023/consumer 3272/arch 1317) → re-split 8515/1069/1028 → re-exported MLX (val distribution changed; loss comparability across the boundary noted).
+- Continued training from 650 → 850 iters on expanded pool: train 0.019, val 0.032, no NaN. Per-chunk ckpts moved aside (iter-number collisions across resume chunks).
+- Next: eval 850-iter adapter on 243-bench — did targeted data fix the 19?
