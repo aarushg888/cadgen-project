@@ -35,5 +35,6 @@ Last updated: 2026-10-04. Stage: 2 DONE (data + benchmark); Stage 3 blocked on l
 - Recipe rank32/scale2.0/drop0.05/lr1e-4/batch4/mask-prompt/all-layers; pilot train 5922 synth-mm rows
 - Overfit-50: loss → 0.000, 3/3 exact repros. Pilot: 600 iters banked (0.4 epochs; contention → micro-chunks + resume)
 - SFT eval (`runs/eval_sft_v1/`, zero-shot): exec 1.000 [1.0,1.0], geo 0.922 [0.885,0.955], IoU 0.910; T1 1.0/1.0, T2 1.0/0.957, T3 1.0/0.80
-- BAR BEATEN (few-shot 0.650/0.325, non-overlapping CIs); geo target 0.80 met. All 19 fails = right-bbox/wrong-volume → next lever: rejection sampling on volume-match, then epoch 2
+- BAR BEATEN (few-shot 0.650/0.325, non-overlapping CIs); geo target 0.80 met.
+- Loop unit 1 (targeted hole-data +250 iters → ckpt850, `runs/eval_sft_v2/`): geo 0.893 [0.852,0.930], CIs overlap v1 = flat (fixed 12 named vol-fails, broke 19). Ship candidate stays ckpt600. Next: rejection-sampling unit (unit 2 of 3).
 - Next: continue loop (§4) → Stage 6 ship (CLI, quantize, model card, PR). Third-party data still NOT cleared.

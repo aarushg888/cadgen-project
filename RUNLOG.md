@@ -127,3 +127,8 @@
 - Hypothesis: all 19 bench fails are vol-off on subtractive features → add hole/cutout-family rows. scripts/build_synth_train.py gained --only/--extra-pool: 4000 draws → 3240 kept (338 overlapped old pool). Merged pool 10612 (mech 6023/consumer 3272/arch 1317) → re-split 8515/1069/1028 → re-exported MLX (val distribution changed; loss comparability across the boundary noted).
 - Continued training from 650 → 850 iters on expanded pool: train 0.019, val 0.032, no NaN. Per-chunk ckpts moved aside (iter-number collisions across resume chunks).
 - Next: eval 850-iter adapter on 243-bench — did targeted data fix the 19?
+
+## 2026-10-10 — loop unit 1 result: targeted data FIXED 12, net FLAT (tied)
+- Evaled 850-iter adapter (243 gens @~1s/gen calm + 3-slice scoring): geo 0.893 [0.852, 0.930], exec 0.996; tiers T1 0.925 / T2 0.943 / T3 0.812 (`runs/eval_sft_v2/`).
+- Flip analysis vs 600-iter: FIXED 12 (11 T3 vol-failures — hypothesis directionally confirmed) but BROKE 19 across tiers → 224→217, CIs [0.885,0.955] vs [0.852,0.930] overlap substantially = no measurable change (unit 1 of 3 per §4 stop rule).
+- Ship candidate stays ckpt600 (higher estimate, first past the bar). Next lever (unit 2): proper rejection sampling — temp-0.8 × k=2 on 1000 train prompts, keep passing + code-different, continue training. (Bench prompts never enter training — contamination.)

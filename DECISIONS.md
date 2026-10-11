@@ -24,3 +24,4 @@
 - 2026-10-10: pilot SFT via banked micro-chunks (save-every 25) through daytime contention; aim ~1500 iters (1 epoch) then eval vs few-shot bar before deciding on epoch 2.
 - 2026-10-10: first SFT eval at 600 iters (0.4 epochs) already beats the few-shot bar with non-overlapping CIs; continue training loop (epoch 2 / rejection sampling on volume-match failures) before ship per §4 loop budget.
 - 2026-10-10: loop unit = targeted data (not more epochs on same data): 3240 hole-family rows added for the named vol-failure mode; continued training on expanded pool rather than restarting.
+- 2026-10-10: loop unit 1 (targeted data +250 iters) = no measurable change (CIs overlap); ship candidate remains ckpt600. Next: rejection-sampling unit, then re-eval; 3 flat units → escalate loop per §4.
