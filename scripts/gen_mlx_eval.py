@@ -23,6 +23,7 @@ def main():
     ap.add_argument("--adapter", required=True)
     ap.add_argument("--temp", type=float, default=0.2)
     ap.add_argument("--max-tokens", type=int, default=400)
+    ap.add_argument("--k", type=int, default=1, help="completions per task (rejection sampling)")
     ap.add_argument("--offset", type=int, default=0)
     ap.add_argument("--limit", type=int, default=None)
     a = ap.parse_args()
@@ -46,15 +47,16 @@ def main():
                 continue
             prompt = tok.apply_chat_template(build_messages(t["prompt"]), tokenize=False,
                                              add_generation_prompt=True)
-            try:
-                comp = generate(model, tok, prompt=prompt, max_tokens=a.max_tokens,
-                                sampler=sampler, verbose=False)
-            except Exception as e:  # noqa: BLE001
-                print(f"{t['id']} FAILED {type(e).__name__}", flush=True)
-                comp = ""
-            f.write(json.dumps({"id": t["id"], "completion": comp}) + "\n")
-            f.flush()
-            n_new += 1
+            for _ in range(max(1, a.k)):
+                try:
+                    comp = generate(model, tok, prompt=prompt, max_tokens=a.max_tokens,
+                                    sampler=sampler, verbose=False)
+                except Exception as e:  # noqa: BLE001
+                    print(f"{t['id']} FAILED {type(e).__name__}", flush=True)
+                    comp = ""
+                f.write(json.dumps({"id": t["id"], "completion": comp}) + "\n")
+                f.flush()
+                n_new += 1
             if n_new % 20 == 0:
                 print(f"{n_new} new ({t['id']}) {time.time() - t0:.0f}s", flush=True)
     print(f"done: {n_new} new -> {a.out}")

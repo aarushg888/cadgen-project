@@ -132,3 +132,8 @@
 - Evaled 850-iter adapter (243 gens @~1s/gen calm + 3-slice scoring): geo 0.893 [0.852, 0.930], exec 0.996; tiers T1 0.925 / T2 0.943 / T3 0.812 (`runs/eval_sft_v2/`).
 - Flip analysis vs 600-iter: FIXED 12 (11 T3 vol-failures — hypothesis directionally confirmed) but BROKE 19 across tiers → 224→217, CIs [0.885,0.955] vs [0.852,0.930] overlap substantially = no measurable change (unit 1 of 3 per §4 stop rule).
 - Ship candidate stays ckpt600 (higher estimate, first past the bar). Next lever (unit 2): proper rejection sampling — temp-0.8 × k=2 on 1000 train prompts, keep passing + code-different, continue training. (Bench prompts never enter training — contamination.)
+
+## 2026-10-11 — loop unit 2: rejection sampling (309 kept) + 300 iters (1150 total)
+- Sampled 1000 train prompts × k=2 @temp0.8 from ckpt850 (2000 gens, chunked through load 11-37): keep = exec-ok + bbox/vol-match vs row exec facts + code-differs-from-ref → 309 kept (21.7%), all own/mm (`/tmp/rft_kept.jsonl`).
+- Mixed into canonical train (8515 → 8824) + re-exported MLX. Continued 850 → 1150 iters: train 0.029, val 0.035, stable.
+- Ckpt hygiene: per-chunk sets moved aside (iter numbers collide across resume chunks); eval staged at runs/eval_ckpt_1150/.
