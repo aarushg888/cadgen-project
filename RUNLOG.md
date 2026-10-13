@@ -151,3 +151,7 @@
 - tests/test_cli.py (3 tests, mocked generator, real sandbox+exports): pass.
 - Live runs with ckpt600 adapter: standoff15 (15×12.99×22, 9 faces, try 1) and cyl20 (20×30, try 1) → all six files valid.
 - Left for ship: viewer HTML, MODEL_CARD.md, GGUF/Ollama packaging note, PR.
+
+## 2026-10-13 — SHIP PR open (Stage 6 definition-of-done, with stated blockers)
+- Viewer (static three.js, code-checked), MODEL_CARD.md (full table + limits + Apache-2.0 proposal), README usage, STATUS ship section. pytest 34 passed.
+- Pushed + opened PR #2 (supsersedes #1, same Stage-1 commits included). Per §6: checkpoint exists, beaten baselines with non-overlapping CIs, CLI proven end-to-end, PR open with summary. Honest stops stated in STATUS: third-party license call, GPU call, GGUF/Ollama + HF upload are human decisions at merge.
