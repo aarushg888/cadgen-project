@@ -145,3 +145,9 @@
 ## 2026-10-11 — greedy verdict: churn is REAL, loop hits structural limits
 - Re-evaled ckpt600 + ckpt1150 at temp 0.0 (deterministic): ckpt600 geo 0.918 (223), ckpt1150 geo 0.889 (216). Same 12-fixed/19-broke pattern as temp-0.2 → NOT sampling noise: extra training genuinely trades T1/T3 accuracy, net zero. Template-data SFT has saturated (~0.92); remaining errors need non-template data (license-blocked) or RL (GPU-blocked).
 - Canonical records: runs/eval_sft600_greedy/ (ship candidate), runs/eval_sft1150_greedy/.
+
+## 2026-10-13 — Stage 6 CLI built + proven end-to-end
+- New cadgen/cli.py: MLX-adapter or OpenAI-endpoint backends, shared prompt format, sandbox-gated retry loop (default 3 tries), writes {name}.py/.step/.stl (Shape.exportStep/exportStl off the executed brep). Console script `cadgen` in pyproject.
+- tests/test_cli.py (3 tests, mocked generator, real sandbox+exports): pass.
+- Live runs with ckpt600 adapter: standoff15 (15×12.99×22, 9 faces, try 1) and cyl20 (20×30, try 1) → all six files valid.
+- Left for ship: viewer HTML, MODEL_CARD.md, GGUF/Ollama packaging note, PR.
