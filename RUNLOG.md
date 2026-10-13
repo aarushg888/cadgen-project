@@ -137,3 +137,7 @@
 - Sampled 1000 train prompts × k=2 @temp0.8 from ckpt850 (2000 gens, chunked through load 11-37): keep = exec-ok + bbox/vol-match vs row exec facts + code-differs-from-ref → 309 kept (21.7%), all own/mm (`/tmp/rft_kept.jsonl`).
 - Mixed into canonical train (8515 → 8824) + re-exported MLX. Continued 850 → 1150 iters: train 0.029, val 0.035, stable.
 - Ckpt hygiene: per-chunk sets moved aside (iter numbers collide across resume chunks); eval staged at runs/eval_ckpt_1150/.
+
+## 2026-10-11 — loop unit 2 result: RFT + 1150 iters ALSO flat (tied 3 ways)
+- Evaled 1150-iter adapter (`runs/eval_sft_1150/`): geo 0.893 [0.852, 0.930] (T1 0.957 / T2 1.000 / T3 0.725), exec 1.0. Identical headline CI to ckpt850; overlaps ckpt600 [0.885, 0.955]. Flip vs ckpt600: fixed 12, broke 19.
+- Two consecutive flat units (§4 stop rule: 1 more flat → escalate loop). Suspect temp-0.2 sampling churn (~5-7% flips) masks real deltas — next methodology: greedy (temp 0.0) re-eval of ship candidates for a clean comparison.
