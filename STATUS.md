@@ -37,4 +37,9 @@ Last updated: 2026-10-04. Stage: 2 DONE (data + benchmark); Stage 3 blocked on l
 - SFT eval (`runs/eval_sft_v1/`, zero-shot): exec 1.000 [1.0,1.0], geo 0.922 [0.885,0.955], IoU 0.910; T1 1.0/1.0, T2 1.0/0.957, T3 1.0/0.80
 - BAR BEATEN (few-shot 0.650/0.325, non-overlapping CIs); geo target 0.80 met.
 - Loop unit 1 (targeted hole-data +250 iters → ckpt850, `runs/eval_sft_v2/`): geo 0.893 [0.852,0.930], CIs overlap v1 = flat (fixed 12 named vol-fails, broke 19). Ship candidate stays ckpt600. Next: rejection-sampling unit (unit 2 of 3).
-- Next: continue loop (§4) → Stage 6 ship (CLI, quantize, model card, PR). Third-party data still NOT cleared.
+- Loop unit 2 (RFT-309 +300 iters → 1150): geo 0.893, three-way tie. Greedy re-eval settled churn as real; loop-escalation filed (needs data or GPU decision).
+- Next: Stage 6 ship below. Third-party data still NOT cleared.
+
+## Stage 6 (ship) — CLI + card + viewer done, PR next
+- CLI `cadgen` (MLX/endpoint backends, retry loop, .py/.step/.stl) proven live twice; viewer static page (code-checked, not visually tested); MODEL_CARD.md with full table + limitations + proposed Apache-2.0
+- Unshipped: GGUF/Ollama packaging (MLX-only adapter), HF upload, release tag — human calls at merge

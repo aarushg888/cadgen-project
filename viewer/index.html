@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<!-- cadgen STL viewer: open viewer/index.html?model=<name>.stl next to your STL file.
+     Static page, no CAD install needed. Loads three.js from a CDN (needs network
+     once); the model itself stays local. -->
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>cadgen STL viewer</title>
+<style>
+  html, body { margin: 0; height: 100%; overflow: hidden; background: #1a1d21; }
+  #app { width: 100%; height: 100%; }
+  #hud { position: fixed; top: 10px; left: 12px; color: #cfd3da; font: 13px/1.5 system-ui, sans-serif;
+         background: rgba(0,0,0,.45); padding: 8px 12px; border-radius: 8px; }
+  #hud b { color: #fff; }
+</style>
+<script type="importmap">
+{"imports": {
+  "three": "https://unpkg.com/three@0.160.0/build/three.module.js",
+  "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/"
+}}
+</script>
+</head>
+<body>
+<div id="app"></div>
+<div id="hud">drag&nbsp;=&nbsp;orbit · wheel&nbsp;=&nbsp;zoom · right-drag&nbsp;=&nbsp;pan<br><span id="info">loading…</span></div>
+<script type="module">
+import * as THREE from 'three';
+import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+import { STLLoader } from 'three/addons/loaders/STLLoader.js';
+
+const file = new URLSearchParams(location.search).get('model') || 'part.stl';
+document.getElementById('info').innerHTML = 'model: <b>' + file + '</b>';
+
+const renderer = new THREE.WebGLRenderer({ antialias: true });
+renderer.setSize(innerWidth, innerHeight);
+document.getElementById('app').appendChild(renderer.domElement);
+
+const scene = new THREE.Scene();
+scene.background = new THREE.Color(0x1a1d21);
+const camera = new THREE.PerspectiveCamera(45, innerWidth / innerHeight, 0.1, 100000);
+const controls = new OrbitControls(camera, renderer.domElement);
+
+scene.add(new THREE.HemisphereLight(0xffffff, 0x333a40, 1.1));
+const key = new THREE.DirectionalLight(0xffffff, 1.6);
+key.position.set(1, 2, 3).multiplyScalar(1000);
+scene.add(key);
+const grid = new THREE.GridHelper(1000, 40, 0x3a4048, 0x2a2f36);
+scene.add(grid);
+
+new STLLoader().load(file, (geom) => {
+  geom.computeBoundingBox();
+  const bb = geom.boundingBox, size = new THREE.Vector3(), center = new THREE.Vector3();
+  bb.getSize(size); bb.getCenter(center);
+  const mat = new THREE.MeshStandardMaterial({ color: 0x4f9cf0, metalness: 0.35, roughness: 0.5 });
+  const mesh = new THREE.Mesh(geom, mat);
+  mesh.position.sub(center);           // center on origin
+  scene.add(mesh);
+  const fit = Math.max(size.x, size.y, size.z) * 1.6;
+  camera.position.set(fit, fit * 0.7, fit);
+  controls.target.set(0, 0, 0);
+  controls.update();
+  const maxDim = Math.max(size.x, size.y, size.z).toFixed(1);
+  document.getElementById('info').innerHTML =
+    'model: <b>' + file + '</b> · bbox max ' + maxDim + ' mm · ' +
+    geom.attributes.position.count / 3 + ' tris';
+  (function animate() { requestAnimationFrame(animate); controls.update(); renderer.render(scene, camera); })();
+}, undefined, (err) => {
+  document.getElementById('info').textContent = 'could not load ' + file + ' (' + err + ') — serve over http, not file://';
+});
+addEventListener('resize', () => {
+  camera.aspect = innerWidth / innerHeight; camera.updateProjectionMatrix();
+  renderer.setSize(innerWidth, innerHeight);
+});
+</script>
+</body>
+</html>
