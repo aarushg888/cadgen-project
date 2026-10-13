@@ -26,3 +26,4 @@
 - 2026-10-10: loop unit = targeted data (not more epochs on same data): 3240 hole-family rows added for the named vol-failure mode; continued training on expanded pool rather than restarting.
 - 2026-10-10: loop unit 1 (targeted data +250 iters) = no measurable change (CIs overlap); ship candidate remains ckpt600. Next: rejection-sampling unit, then re-eval; 3 flat units → escalate loop per §4.
 - 2026-10-11: loop unit 2 (RFT+300 iters) = flat again (3-way tie, overlapping CIs). Ship still ckpt600 on point estimate; will settle by greedy re-eval (removes sampling churn) before any ship PR.
+- 2026-10-11: greedy settling complete — ship ckpt600 (0.918 greedy). Filing §4 loop-escalation (2 flat units + saturation diagnosis) and moving to Stage 6 ship work, which needs no escalation.

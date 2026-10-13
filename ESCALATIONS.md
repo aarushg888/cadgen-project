@@ -8,3 +8,4 @@
 
 ## Resolved
 - (none yet)
+- 2026-10-11 — §4 loop escalation (the loop itself, not one action): two full loop units (targeted hole-data +250 iters; RFT-309 +300 iters) produced no net movement (0.922 → 0.893 → 0.918-greedy, all CIs overlapping), and greedy re-eval proves the churn is real model movement, not noise. Diagnosis: template-data SFT saturated — the 19-26 residual fails need (a) non-template training data (you rule on the Text2CAD escalation above) or (b) verifier RL on a rented GPU (needs spend approval). Question (30s): approve (a) and/or (b), or direct me to ship ckpt600 as-is? Meanwhile: shipping (Stage 6 CLI/quantize/card/PR, own data, local tools only).

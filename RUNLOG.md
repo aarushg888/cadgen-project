@@ -141,3 +141,7 @@
 ## 2026-10-11 — loop unit 2 result: RFT + 1150 iters ALSO flat (tied 3 ways)
 - Evaled 1150-iter adapter (`runs/eval_sft_1150/`): geo 0.893 [0.852, 0.930] (T1 0.957 / T2 1.000 / T3 0.725), exec 1.0. Identical headline CI to ckpt850; overlaps ckpt600 [0.885, 0.955]. Flip vs ckpt600: fixed 12, broke 19.
 - Two consecutive flat units (§4 stop rule: 1 more flat → escalate loop). Suspect temp-0.2 sampling churn (~5-7% flips) masks real deltas — next methodology: greedy (temp 0.0) re-eval of ship candidates for a clean comparison.
+
+## 2026-10-11 — greedy verdict: churn is REAL, loop hits structural limits
+- Re-evaled ckpt600 + ckpt1150 at temp 0.0 (deterministic): ckpt600 geo 0.918 (223), ckpt1150 geo 0.889 (216). Same 12-fixed/19-broke pattern as temp-0.2 → NOT sampling noise: extra training genuinely trades T1/T3 accuracy, net zero. Template-data SFT has saturated (~0.92); remaining errors need non-template data (license-blocked) or RL (GPU-blocked).
+- Canonical records: runs/eval_sft600_greedy/ (ship candidate), runs/eval_sft1150_greedy/.
