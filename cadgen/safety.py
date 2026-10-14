@@ -10,7 +10,8 @@ from __future__ import annotations
 import ast
 from dataclasses import dataclass, field
 
-ALLOWED_IMPORTS = {"cadquery", "math", "numpy", "typing", "itertools", "functools", "collections", "dataclasses"}
+ALLOWED_IMPORTS = {"cadquery", "math", "numpy", "typing", "itertools", "functools", "collections", "dataclasses",
+                   "types"}  # types: SimpleNamespace param blocks (Zero-to-CAD style); no I/O capability
 FORBIDDEN_NAMES = {
     "exec", "eval", "compile", "open", "__import__", "input", "breakpoint",
     "globals", "locals", "vars", "getattr", "setattr", "delattr", "exit", "quit",
