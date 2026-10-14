@@ -165,3 +165,11 @@
 - CLI: syntax pre-check (unparseable fails fast, no sandbox cost) + temp-escalating retry (0.2/0.6/1.0); 4 tests pass. Pyramid prompt now completes (dims still off — data gap stands).
 - New STACK_TRAIN emitters (stacked_boxes/stepped_cylinders/mixed_stack, 2-6 levels, validity-guarded wide dims); benchmark TIER lists untouched (v1 frozen). 3000 draws → 2025 kept, 0 bench overlap. Pool now 12637 → split 10150/746-train... (train 10150 / val 1274 / test 1213), re-exported MLX.
 - Wrote future_plans.md (position + battle cards + tracks A-D + eval + sequencing; Zero-to-CAD verified Apache-2.0 but promptless; bpy parked).
+
+## overnight — 3 more chunks (2350 iters, loss plateaued ~0.02)
+- c1/c2/c3 × 400 iters on stack-expanded pool: train 0.020/0.023/0.018, val 0.016/0.019/0.015. No NaN/OOM. Per-chunk ckpt sets aside (nightc1/2/3_ckpts); eval staged at runs/eval_ckpt_2350/.
+
+## overnight — 2350 iters: 0.938 greedy (+5 net), pyramid terminates but dims off
+- 3×400-iter chunks on stack-expanded pool (10150 train): loss → ~0.015 plateau. Staged runs/eval_ckpt_2350/.
+- Greedy eval (`runs/eval_2350/`): geo 0.938 [0.905, 0.967] (s0 .975 / s1 1.0 / s2 .840). Fixed 11 vs ckpt600, broke 6. CIs still overlap ckpt600 — directional gain, not decisive.
+- Pyramid retest: TERMINATES cleanly now (no loop — stack data worked for that) but dims wrong (box 80x50x30 + cylinder top vs 3 squares). Compositional dim-mapping remains the gap.
