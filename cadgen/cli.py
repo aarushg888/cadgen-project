@@ -56,17 +56,27 @@ def _export_files(code: str, exec_info, out_dir: str, name: str) -> dict:
 
 
 def run(prompt: str, generate_fn, out_dir: str, name: str, tries: int = 3,
-        timeout: float = 30.0) -> dict:
-    """Try up to `tries` generations; return summary. generate_fn(prompt) -> str."""
+        timeout: float = 30.0, temperatures=(0.2, 0.6, 1.0)) -> dict:
+    """Try up to `tries` generations; return summary. generate_fn(prompt, temperature) -> str.
+    Guards: unparseable code (e.g. the stacked-loop truncation class) fails fast
+    without sandbox cost; temperature escalates per try to break deterministic loops."""
+    import ast
     import tempfile
     attempts = []
     for i in range(max(1, tries)):
+        temp = temperatures[min(i, len(temperatures) - 1)]
         try:
-            completion = generate_fn(prompt)
+            completion = generate_fn(prompt, temperature=temp)
         except Exception as e:  # noqa: BLE001 - backend hiccup: counted, retried
             attempts.append({"try": i, "status": "generate_error", "error": f"{type(e).__name__}: {e}"[:200]})
             continue
         code = extract_code(completion)
+        try:
+            compile(code, "<cli>", "exec")
+        except (SyntaxError, ValueError) as e:
+            attempts.append({"try": i, "status": "syntax_error", "error": f"unparseable ({e})"[:200],
+                             "temperature": temp})
+            continue
         work = tempfile.mkdtemp(prefix="cadgen_cli_")
         res = run_code(code, timeout=timeout, outdir=work)
         attempts.append({"try": i, "status": res.status, "error": res.error[:200]})
@@ -93,12 +103,14 @@ def main(argv=None):
     ap.add_argument("--base-url", default=None)
     a = ap.parse_args(argv)
     if a.adapter:
-        def gen(p, _m=a.model, _ad=a.adapter, _t=a.temperature, _n=a.max_tokens):
-            return _mlx_generate(_m, _ad, build_messages(p), _t, _n)
+        def gen(p, temperature=0.2, _m=a.model, _ad=a.adapter, _n=a.max_tokens):
+            return _mlx_generate(_m, _ad, build_messages(p), temperature, _n)
     else:
-        def gen(p, _m=a.model_endpoint, _b=a.base_url, _t=a.temperature, _n=a.max_tokens):
-            return _api_generate(_m, _b, build_messages(p), _t, _n)
-    summary = run(a.prompt, gen, a.out, a.name, tries=a.tries, timeout=a.timeout)
+        def gen(p, temperature=0.2, _m=a.model_endpoint, _b=a.base_url, _n=a.max_tokens):
+            return _api_generate(_m, _b, build_messages(p), temperature, _n)
+    temps = (a.temperature, min(1.0, a.temperature + 0.4), 1.0)
+    summary = run(a.prompt, gen, a.out, a.name, tries=a.tries, timeout=a.timeout,
+                  temperatures=temps)
     print(json.dumps({k: v for k, v in summary.items() if k != "attempts"}, indent=2))
     if not summary["ok"]:
         raise SystemExit(f"all {summary['tries_used']} tries failed: "
