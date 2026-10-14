@@ -1,11 +1,24 @@
 # Benchmark
 
-## Seed smoke benchmark (current: `seed_tasks.jsonl`, 12 tasks)
-- Hand-written in `build_seed_benchmark.py` (prior session): prompt + reference CadQuery per task.
-- Categories: mechanical (8), consumer (2: pencil_holder, picture_frame), architectural (1: stepped_pyramid) + 1 more.
-- Fully hand-checked by construction (each reference was written alongside its prompt), but tiny — it is a **harness smoke test**, not a measure of model quality.
-- Quality bar: `scripts/smoke_test.py` asserts the filter keeps all 12 and rejects 4 deliberately bad samples.
+## Seed smoke benchmark (`seed_tasks.jsonl`, 12 tasks)
+Hand-written in `build_seed_benchmark.py` (prior session). Harness smoke test only.
 
-## Real benchmark (Stage 2/5 deliverable — not built yet)
-- Target: 200+ tasks across three tiers (in-distribution, novel phrasing, consumer/architectural).
-- Planned process per AGENTS.md: synth-generate candidates → sandbox execution filter → bbox/volume self-consistency check → train-set decontamination → **automated-quality** benchmark (stated as such, not hand-verified), plus a 30–50 sample human spot-check recorded as the benchmark's error bar.
+## v1 benchmark (`tasks.jsonl`, 243 tasks) — AUTOMATED-QUALITY, not hand-verified
+Built by `benchmark/build_v1.py --n-per-tier 120 --seed 7` (300 candidates → 243 kept):
+- Tier 1 (93): template-like mechanical prompts, exact dims
+- Tier 2 (70): same geometries, novel phrasing (casual / spec-sheet / minimal)
+- Tier 3 (80): consumer/architectural objects (holder, frame, planter, coaster,
+  bookend, table, shelf, stepped vase) — the D1 angle-A coverage
+- 18 template families; all reference code defines `result`, mm, single solid.
+
+Gates (all machine-run): (1) sandbox exec → valid single solid, dedupe code+geom;
+(2) self-consistency — prompt dims vs executed bbox (10%) and analytic volume
+(25%); (3) decontamination vs pilot train — prompt normalized-exact / token
+Jaccard ≥ 0.85 / geometry-signature match (0 rejects: mm templates don't collide
+with normalized-unit train).
+
+Human spot-check (2026-10-04): 40/243 read by eye, 39 correct → estimated
+benchmark error ~2.5%. One known template edge: small bolt circles can graze the
+center hole (e.g. bench-1-008) — valid solid, dims as stated. LLM-generated
+references (more diverse phrasing/geometry) are a future v2; templates were
+chosen because ~4h of local generation for ~15% yield was infeasible here.

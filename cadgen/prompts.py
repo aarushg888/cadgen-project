@@ -10,3 +10,16 @@ SYSTEM_PROMPT = (
 
 def build_messages(prompt: str) -> list[dict]:
     return [{"role": "system", "content": SYSTEM_PROMPT}, {"role": "user", "content": prompt}]
+
+
+def build_fewshot_messages(examples: list[dict], prompt: str) -> list[dict]:
+    """Zero-shot messages with N demonstration turns inserted after the system
+    prompt. Each example needs `prompt` and `code` keys; code is sent fenced so
+    the model sees the exact output contract. Examples must come from OUTSIDE
+    the eval set (e.g. seed tasks when evaluating the v1 benchmark)."""
+    msgs = [{"role": "system", "content": SYSTEM_PROMPT}]
+    for ex in examples:
+        msgs.append({"role": "user", "content": ex["prompt"]})
+        msgs.append({"role": "assistant", "content": "```python\n" + ex["code"].strip() + "\n```"})
+    msgs.append({"role": "user", "content": prompt})
+    return msgs

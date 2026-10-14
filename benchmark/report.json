@@ -1,0 +1,36 @@
+{
+  "gate1": {
+    "ok": 243,
+    "multi_solid": 2,
+    "dup_code": 113,
+    "dup_geometry": 2
+  },
+  "gate2kept": 243,
+  "reject": [],
+  "final": 243,
+  "per_tier": {
+    "1": 93,
+    "2": 70,
+    "3": 80
+  },
+  "per_template": {
+    "l_bracket": 18,
+    "flange": 24,
+    "hex_nut": 12,
+    "u_channel": 15,
+    "standoff": 13,
+    "disc_holes": 20,
+    "cylinder": 15,
+    "open_box": 16,
+    "washer": 10,
+    "plate_holes": 20,
+    "square_planter": 15,
+    "drain_coaster": 6,
+    "pencil_holder": 9,
+    "shelf_unit": 10,
+    "picture_frame": 14,
+    "stepped_vase": 12,
+    "simple_table": 6,
+    "bookend": 8
+  }
+}
