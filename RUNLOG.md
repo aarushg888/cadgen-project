@@ -173,3 +173,7 @@
 - 3×400-iter chunks on stack-expanded pool (10150 train): loss → ~0.015 plateau. Staged runs/eval_ckpt_2350/.
 - Greedy eval (`runs/eval_2350/`): geo 0.938 [0.905, 0.967] (s0 .975 / s1 1.0 / s2 .840). Fixed 11 vs ckpt600, broke 6. CIs still overlap ckpt600 — directional gain, not decisive.
 - Pyramid retest: TERMINATES cleanly now (no loop — stack data worked for that) but dims wrong (box 80x50x30 + cylinder top vs 3 squares). Compositional dim-mapping remains the gap.
+
+## Track B v1 (ambiguity): detector + CLI clarify flow, proven live
+- New cadgen/ambiguity.py: deterministic analyze() (missing dims <2 numbers, vague size words, conflict scan) + clarify() appender; 5 tests pass.
+- CLI --clarify/--answers: vague "A pencil cup." → 1 question → answered "90 dia/110/5 walls" → built 90x90x110 first try, Q&A logged in summary. Interactive stdin path implemented (untested live — needs a human).

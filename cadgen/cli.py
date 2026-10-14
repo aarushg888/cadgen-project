@@ -96,6 +96,10 @@ def main(argv=None):
     ap.add_argument("--timeout", type=float, default=30.0)
     ap.add_argument("--temperature", type=float, default=0.2)
     ap.add_argument("--max-tokens", type=int, default=400)
+    ap.add_argument("--clarify", action="store_true",
+                    help="analyze the prompt for ambiguity first; ask up to 3 questions")
+    ap.add_argument("--answers", default=None,
+                    help="non-interactive clarifications, ';'-separated (implies --clarify)")
     src = ap.add_mutually_exclusive_group(required=True)
     src.add_argument("--adapter", help="MLX adapter dir (with --model)")
     src.add_argument("--model-endpoint", help="model name for an OpenAI-compatible endpoint (with --base-url)")
@@ -109,8 +113,21 @@ def main(argv=None):
         def gen(p, temperature=0.2, _m=a.model_endpoint, _b=a.base_url, _n=a.max_tokens):
             return _api_generate(_m, _b, build_messages(p), temperature, _n)
     temps = (a.temperature, min(1.0, a.temperature + 0.4), 1.0)
-    summary = run(a.prompt, gen, a.out, a.name, tries=a.tries, timeout=a.timeout,
+    prompt, qa_log = a.prompt, []
+    if a.clarify or a.answers:
+        from .ambiguity import analyze, clarify
+        rep = analyze(a.prompt)
+        if not rep["ok"]:
+            if a.answers:
+                answers = [x for x in a.answers.split(";")]
+            else:
+                print("Clarifying questions (empty line to skip):")
+                answers = [input(f"  {q} ") for q in rep["questions"]]
+            prompt = clarify(a.prompt, answers)
+            qa_log = [{"q": q, "a": ans} for q, ans in zip(rep["questions"], answers)]
+    summary = run(prompt, gen, a.out, a.name, tries=a.tries, timeout=a.timeout,
                   temperatures=temps)
+    summary["clarifications"] = qa_log
     print(json.dumps({k: v for k, v in summary.items() if k != "attempts"}, indent=2))
     if not summary["ok"]:
         raise SystemExit(f"all {summary['tries_used']} tries failed: "
