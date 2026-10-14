@@ -155,3 +155,8 @@
 ## 2026-10-13 — SHIP PR open (Stage 6 definition-of-done, with stated blockers)
 - Viewer (static three.js, code-checked), MODEL_CARD.md (full table + limits + Apache-2.0 proposal), README usage, STATUS ship section. pytest 34 passed.
 - Pushed + opened PR #2 (supsersedes #1, same Stage-1 commits included). Per §6: checkpoint exists, beaten baselines with non-overlapping CIs, CLI proven end-to-end, PR open with summary. Honest stops stated in STATUS: third-party license call, GPU call, GGUF/Ollama + HF upload are human decisions at merge.
+
+## 2026-10-13 — user-acceptance spot test (ckpt600 CLI, 3 fresh prompts)
+- plate 100x60x6 + 4x5mm holes: try 1, bbox exact, vol correct less holes (35529), 10 faces. PASS.
+- cup 90 dia x 110, hollow 5mm walls: try 1, bbox exact, clean cut code (8mm base inferred). PASS.
+- stepped pyramid 80/50/30 x 20 each: 0/3, all `unclosed ( (line 3)`. Diagnosis: model loops stacked `.faces().workplane().box(80,50,20)` (wrong dims, never descends 80-50-30) until max_tokens; greedy too. NEW failure mode: repetitive loop on multi-level stacks. No fence close, no EOS. Candidate lever: stack-depth-diverse synth data or max-token/repetition-penalty at gen time.
