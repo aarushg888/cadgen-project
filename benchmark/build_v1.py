@@ -402,6 +402,78 @@ def stepped_vase(rng, style, wide=False):
                 expected_bbox=[2 * R0, 2 * R0, H], expected_vol=vol)
 
 
+# ---------------------------------------------------------------- training-only emitters
+# Variable-depth stacks (2-6 levels). NOT in TIER1/TIER3: the v1 benchmark stays
+# frozen (all baselines measured against it). These exist to teach multi-level
+# stacked features, the observed loop-failure mode, to future training runs.
+
+def _stack_levels(rng, lo, hi, n):
+    return sorted((_ri(rng, lo, hi) for _ in range(n)), reverse=True)
+
+
+def stacked_boxes(rng, style, wide=True):
+    n = _ri(rng, 2, 6)
+    Ws = _stack_levels(rng, 15, 120, n)
+    hs = [_ri(rng, 10, 60) for _ in range(n)]
+    H = sum(hs)
+    dims = ", ".join(f"{w}" for w in Ws)
+    hs_s = ", ".join(f"{h}" for h in hs)
+    prompt = _p(style,
+        f"A stepped block tower of {n} stacked square blocks, {dims} mm wide, with heights {hs_s} mm, centered on each other.",
+        f"stacked blocks ({n} levels), widths {dims} mm, heights {hs_s}.",
+        f"STACKED BLOCKS\nLevels: {n}\nWidths: {dims} mm\nHeights: {hs_s} mm",
+        f"block stack {dims} x [{hs_s}].")
+    chain = f"cq.Workplane(\"XY\").box({Ws[0]}, {Ws[0]}, {hs[0]})"
+    chain += "".join(f".faces(\">Z\").workplane().box({w}, {w}, {h})" for w, h in zip(Ws[1:], hs[1:]))
+    code = f"import cadquery as cq\nresult = ({chain})\n"
+    return dict(prompt=prompt, code=code, category="architectural",
+                expected_bbox=[Ws[0], Ws[0], H], expected_vol=sum(w * w * h for w, h in zip(Ws, hs)))
+
+
+def stepped_cylinders(rng, style, wide=True):
+    n = _ri(rng, 2, 6)
+    Rs = _stack_levels(rng, 8, 60, n)
+    hs = [_ri(rng, 10, 80) for _ in range(n)]
+    H = sum(hs)
+    dims = ", ".join(f"{r}" for r in Rs)
+    hs_s = ", ".join(f"{h}" for h in hs)
+    prompt = _p(style,
+        f"A stepped tower of {n} stacked cylinders with radii {dims} mm and heights {hs_s} mm.",
+        f"stepped cylinders ({n} levels), radii {dims}, heights {hs_s}.",
+        f"STEPPED CYLINDERS\nLevels: {n}\nRadii: {dims} mm\nHeights: {hs_s} mm",
+        f"cyl stack R{dims} H[{hs_s}].")
+    chain = f"cq.Workplane(\"XY\").circle({Rs[0]}).extrude({hs[0]})"
+    chain += "".join(f".faces(\">Z\").workplane().circle({r}).extrude({h})" for r, h in zip(Rs[1:], hs[1:]))
+    code = f"import cadquery as cq\nresult = ({chain})\n"
+    return dict(prompt=prompt, code=code, category="architectural",
+                expected_bbox=[2 * Rs[0], 2 * Rs[0], H],
+                expected_vol=sum(PI * r * r * h for r, h in zip(Rs, hs)))
+
+
+def mixed_stack(rng, style, wide=True):
+    W0, h0 = _ri(rng, 40, 120), _ri(rng, 15, 50)
+    n = _ri(rng, 1, 3)
+    Rs = _stack_levels(rng, 6, W0 // 2 - 1, n)
+    hs = [_ri(rng, 10, 60) for _ in range(n)]
+    H = h0 + sum(hs)
+    dims = ", ".join(f"{r}" for r in Rs)
+    hs_s = ", ".join(f"{h}" for h in hs)
+    prompt = _p(style,
+        f"A square base block {W0} mm by {W0} mm and {h0} mm tall with {n} cylinders stacked on top, radii {dims} mm and heights {hs_s} mm.",
+        f"base block {W0}x{W0}x{h0} plus {n} stacked cylinders R{dims} H[{hs_s}].",
+        f"MIXED STACK\nBase: {W0} x {W0} x {h0} mm\nCylinders: {n}, R {dims} mm, H {hs_s} mm",
+        f"block+cyl stack {W0}/{dims}.")
+    chain = f"cq.Workplane(\"XY\").box({W0}, {W0}, {h0})"
+    chain += "".join(f".faces(\">Z\").workplane().circle({r}).extrude({h})" for r, h in zip(Rs, hs))
+    code = f"import cadquery as cq\nresult = ({chain})\n"
+    vol = W0 * W0 * h0 + sum(PI * r * r * h for r, h in zip(Rs, hs))
+    return dict(prompt=prompt, code=code, category="architectural",
+                expected_bbox=[W0, W0, H], expected_vol=vol)
+
+
+STACK_TRAIN = [stacked_boxes, stepped_cylinders, mixed_stack]
+
+
 TIER1 = [plate_holes, cylinder, washer, hex_nut, disc_holes, l_bracket, u_channel, open_box, flange, standoff]
 TIER3 = [pencil_holder, picture_frame, square_planter, drain_coaster, bookend, simple_table, shelf_unit, stepped_vase]
 STYLES1 = ["plain"]

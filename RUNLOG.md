@@ -160,3 +160,8 @@
 - plate 100x60x6 + 4x5mm holes: try 1, bbox exact, vol correct less holes (35529), 10 faces. PASS.
 - cup 90 dia x 110, hollow 5mm walls: try 1, bbox exact, clean cut code (8mm base inferred). PASS.
 - stepped pyramid 80/50/30 x 20 each: 0/3, all `unclosed ( (line 3)`. Diagnosis: model loops stacked `.faces().workplane().box(80,50,20)` (wrong dims, never descends 80-50-30) until max_tokens; greedy too. NEW failure mode: repetitive loop on multi-level stacks. No fence close, no EOS. Candidate lever: stack-depth-diverse synth data or max-token/repetition-penalty at gen time.
+
+## 2026-10-13 (overnight run start) — loop-bug guard + stack data + future_plans.md
+- CLI: syntax pre-check (unparseable fails fast, no sandbox cost) + temp-escalating retry (0.2/0.6/1.0); 4 tests pass. Pyramid prompt now completes (dims still off — data gap stands).
+- New STACK_TRAIN emitters (stacked_boxes/stepped_cylinders/mixed_stack, 2-6 levels, validity-guarded wide dims); benchmark TIER lists untouched (v1 frozen). 3000 draws → 2025 kept, 0 bench overlap. Pool now 12637 → split 10150/746-train... (train 10150 / val 1274 / test 1213), re-exported MLX.
+- Wrote future_plans.md (position + battle cards + tracks A-D + eval + sequencing; Zero-to-CAD verified Apache-2.0 but promptless; bpy parked).

@@ -22,7 +22,7 @@ import sys
 import tempfile
 
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
-from benchmark.build_v1 import STYLES3, TIER1, TIER3, _norm_prompt, _tok_jaccard  # noqa: E402
+from benchmark.build_v1 import STACK_TRAIN, STYLES3, TIER1, TIER3, _norm_prompt, _tok_jaccard  # noqa: E402
 from cadgen.data.filter import _code_hash, run_filter  # noqa: E402
 from cadgen.metrics import bbox_match, volume_match  # noqa: E402
 from cadgen.schema import read_jsonl  # noqa: E402
@@ -43,7 +43,7 @@ def main():
     rng = random.Random(a.seed)
 
     cands, meta = [], {}
-    pool = [(fn, s) for fn in TIER1 + TIER3 for s in STYLES3]
+    pool = [(fn, s) for fn in TIER1 + TIER3 + STACK_TRAIN for s in STYLES3]
     if a.only:
         want = set(a.only.split(","))
         pool = [(fn, s) for fn, s in pool if fn.__name__ in want]
