@@ -27,3 +27,4 @@
 - 2026-10-10: loop unit 1 (targeted data +250 iters) = no measurable change (CIs overlap); ship candidate remains ckpt600. Next: rejection-sampling unit, then re-eval; 3 flat units → escalate loop per §4.
 - 2026-10-11: loop unit 2 (RFT+300 iters) = flat again (3-way tie, overlapping CIs). Ship still ckpt600 on point estimate; will settle by greedy re-eval (removes sampling churn) before any ship PR.
 - 2026-10-11: greedy settling complete — ship ckpt600 (0.918 greedy). Filing §4 loop-escalation (2 flat units + saturation diagnosis) and moving to Stage 6 ship work, which needs no escalation.
+- 2026-10-15: STOP training loop per §4 — 3250 iters regressed to 0.835 (overtraining signal). Ship = 2350 adapter (0.938). No further SFT without new data or RL.

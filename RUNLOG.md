@@ -183,3 +183,12 @@
 - Schema verified via viewer API: NO text prompts (code/renders/stl/step only). Renderer v2 reads code-level dims (Measures blocks + plain assignments, constants-only arithmetic): 96.5% yield, e.g. named dims + feature words.
 - safety.py: `types` import allowed (SimpleNamespace param blocks, no I/O).
 - Sliced 12k → banked 1938 exec-passed (complex parts ~0.5/s) → prompt-number agreement 1169/1938 (60%) → decontam 0 collisions → merged. Pool now 13806 (12637 synth-own + 1169 z2c), split 11099/1375/1332.
+
+## overnight — z2c-enriched training to 3250 iters (3x300 chunks, batch2/accum2/seq1024 after OOM)
+- OOM (Metal) at load 21 on batch4/seq2048 → batch 2 + grad-accum 2 + max-seq 1024 (only 3 rows >1024 tokens). Killed own idle ollama for RAM.
+- C4/C5/C6: train 0.113 → 0.104 → 0.086, val 0.030 → 0.032 → 0.035 (new harder distribution; stable, no NaN). Staged runs/eval_ckpt_3250/.
+
+## overnight/morning — 3250 iters REGRESSED (0.835); STOP per §4, ship 2350
+- Scoring fought the machine (two 847s/977s single-task IoU landmines + freeze episodes); finished via incremental-row eval with per-task budget. Canonical: runs/eval_3250/ geo 0.835 [0.786, 0.881], T1 0.882/T2 0.943/T3 0.688; flips vs ckpt600: fixed 11, broke 31. CIs vs ckpt600 greedy barely non-overlapping = significant regression signal.
+- Verified ladder (all greedy, deterministic): ckpt600 0.918/0.922 → 1150 0.889/0.893 → 2350 0.938 → 3250 0.835. Overtraining on narrow data past ~2350. SHIP = 2350 adapter (0.938 [0.905,0.967]); card updated. Loop halted per §4 (regression after 2 flats) — next moves need human calls (data/GPU) already escalated.
+- Also verified: card's 2350 numbers recomputed from disk (not memory) after catching a mix-up mid-edit.

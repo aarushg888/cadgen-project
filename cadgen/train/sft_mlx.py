@@ -58,6 +58,8 @@ def build_cmd(a) -> tuple[list[str], dict]:
            "--config", cfg_path]
     if a.grad_checkpoint:
         cmd.append("--grad-checkpoint")
+    if a.grad_accum and a.grad_accum > 1:
+        cmd += ["--grad-accumulation-steps", str(a.grad_accum)]
     if a.resume:
         cmd += ["--resume-adapter-file", a.resume]
     if eval_every:
@@ -87,6 +89,7 @@ def main():
     ap.add_argument("--val-batches", type=int, default=20,
                     help="validation batches per eval (-1 = full set; slow)")
     ap.add_argument("--grad-checkpoint", action="store_true")
+    ap.add_argument("--grad-accum", type=int, default=1)
     ap.add_argument("--resume", default=None, help="adapter .safetensors to resume from (chunked long runs)")
     ap.add_argument("--dry-run", action="store_true")
     a = ap.parse_args()
