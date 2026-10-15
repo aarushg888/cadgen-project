@@ -13,3 +13,4 @@
 - `ricemonster/NeurIPS11092` (Text-to-CadQuery, HF model-type repo) — Text2CAD lineage; assume non-commercial until verified.
 - Permissive GitHub CadQuery examples — record each repo + license before use.
 - Own synthetic data — check generator provider ToS for training use before relying on it commercially.
+| Zero-to-CAD pilot (`ADSKAILab/Zero-To-CAD-100k`, 40/162 train shards kept locally) | `data/raw/z2c/` (gitignored, ~5GB) | Apache-2.0 (verified README + card; agentic-synth, zero proprietary data) | Yes — 1169 rows (code→prompt rendered, exec + agreement-gated, decontaminated) | mm-tagged; scale ≈1u≈1mm. Full 81k infeasible on this machine; expand later. |

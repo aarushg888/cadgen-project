@@ -177,3 +177,9 @@
 ## Track B v1 (ambiguity): detector + CLI clarify flow, proven live
 - New cadgen/ambiguity.py: deterministic analyze() (missing dims <2 numbers, vague size words, conflict scan) + clarify() appender; 5 tests pass.
 - CLI --clarify/--answers: vague "A pencil cup." → 1 question → answered "90 dia/110/5 walls" → built 90x90x110 first try, Q&A logged in summary. Interactive stdin path implemented (untested live — needs a human).
+
+## overnight Track A: Zero-to-CAD ingested (Apache-2.0 verified, 1169 rows live)
+- allow_patterns failed open → fetched all 162 train shards (21GB); trimmed to 40 shards (~5GB, ~20k rows), disk 96%→92%. Lesson: verify fnmatch behavior, not intent.
+- Schema verified via viewer API: NO text prompts (code/renders/stl/step only). Renderer v2 reads code-level dims (Measures blocks + plain assignments, constants-only arithmetic): 96.5% yield, e.g. named dims + feature words.
+- safety.py: `types` import allowed (SimpleNamespace param blocks, no I/O).
+- Sliced 12k → banked 1938 exec-passed (complex parts ~0.5/s) → prompt-number agreement 1169/1938 (60%) → decontam 0 collisions → merged. Pool now 13806 (12637 synth-own + 1169 z2c), split 11099/1375/1332.
